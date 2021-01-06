@@ -44,4 +44,4 @@ add_executable(
   ${header_files}
 )
 
-target_link_libraries(Tuto ${OpenCV_LIBS})
+target_link_libraries(projet ${OpenCV_LIBS})
