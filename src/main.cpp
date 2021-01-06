@@ -16,93 +16,80 @@ using namespace std;
 int main(int argc, char** argv)
 {
     // Declare the output variables
-    Mat dst, cdst, cdstP;
-    const char* default_file = "data/saliere/test_1.jpg";
-    const char* filename = argc >=2 ? argv[1] : default_file;
-    // Loads an image
-    Mat Gray_image = imread( samples::findFile( filename ), IMREAD_GRAYSCALE );
-    // Check if image is loaded fine
-    if(Gray_image.empty()){
-        printf(" Error opening image\n");
-        printf(" Program Arguments: [image_name -- default %s] \n", default_file);
-        return -1;
-    }
+    Mat canny_edges_gray, im_hough_lines, im_hough_segments;
 
+    // Loads an image
+    Mat im_gray = imread( samples::findFile( "data/saliere/test_1.jpg" ), IMREAD_GRAYSCALE );
 
     // Edge detection
-    Canny(Gray_image, dst, 50, 200, 3);
+    Canny(im_gray, canny_edges_gray, 50, 200, 3);
     // Copy edges to the images that will display the results in BGR
-    cvtColor(dst, cdst, COLOR_GRAY2BGR);
-    cdstP = cdst.clone();
+    cvtColor(canny_edges_gray, im_hough_lines, COLOR_GRAY2BGR);
+    im_hough_segments = im_hough_lines.clone();
 
-    // Standard Hough Line Transform
+
+    // Standard Hough Line Transform (lines)
     vector<Vec2f> lines; // will hold the results of the detection
-    HoughLines(dst, lines, 1, CV_PI/180, 150, 0, 0 ); // runs the actual detection
+    HoughLines(canny_edges_gray, lines, 1, CV_PI/180, 150, 0, 0 ); // runs the actual detection
+    
     // Draw the lines
     for( size_t i = 0; i < lines.size(); i++ )
     {
         float rho = lines[i][0], theta = lines[i][1];
-        Point pt1, pt2;
-        double a = cos(theta), b = sin(theta);
-        double x0 = a*rho, y0 = b*rho;
+        Point2f pt1, pt2;
+        float a = cos(theta), b = sin(theta);
+        float x0 = a*rho, y0 = b*rho;
         pt1.x = cvRound(x0 + 10000*(-b));
         pt1.y = cvRound(y0 + 10000*(a));
         pt2.x = cvRound(x0 - 10000*(-b));
         pt2.y = cvRound(y0 - 10000*(a));
-        line( cdst, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
-        circle(cdstP, pt1, 3, Scalar(0,255,0), 3);
-        circle(cdstP, pt2, 3, Scalar(0,255,0), 3);
+        line( im_hough_lines, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
     }
-    // Probabilistic Line Transform
-    vector<Vec4i> linesP; // will hold the results of the detection
-    HoughLinesP(dst, linesP, 1, CV_PI/180, 50, 30, 10 ); // runs the actual detection
+
+    // Probabilistic Line Transform (segments)
+    vector<Vec4i> segments; // will hold the results of the detection
+    HoughLinesP(canny_edges_gray, segments, 1, CV_PI/180, 50, 30, 10 ); // runs the actual detection
+    
     // Draw the lines
-    //vector<float> angles = get_angles(linesP);
-    //vector<int> labels = kmeans(angles);
-/*
-    vector<Vec4i> linesV;
-    vector<Vec4i> linesH;
-
-    for (int k = 0 ; k < linesP.size(); k++){
-        if (labels[k] == 1  )
-            linesV.push_back(linesP[k]);
-        else
-            linesH.push_back(linesP[k]);
-
-    }
-
-*/
-    for( size_t i = 0; i < linesP.size(); i++ )
+    for( size_t i = 0; i < segments.size(); i++ )
     {
-        Vec4i l = linesP[i];
-        line( cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,255,0), 3, LINE_AA);
+        Vec4i points_segment = segments[i];
+        line( im_hough_segments, Point(points_segment[0], points_segment[1]), Point(points_segment[2], points_segment[3]), Scalar(0,255,0), 3, LINE_AA);
     }
     
-
-    vector<Point2f> intersectionPoints;
-    for (auto lineV : linesP){
-        for (auto lineH : linesP){
+    // Computing the intersections between the segments
+    vector<Point2f> intersection_points_segments;
+    for (auto lineV : segments){
+        for (auto lineH : segments){
             if (lineV != lineH){
                 Point2f o1(lineH[0], lineH[1]);
                 Point2f p1(lineH[2], lineH[3]);
                 Point2f o2(lineV[0], lineV[1]);
                 Point2f p2(lineV[2], lineV[3]);
-                Point2f r = Point2f(0.0f, 0.0f);
+                Point2f r;;
 
                 if (intersection(o1, p1, o2, p2, r)){
-                    intersectionPoints.push_back(r);
+                    intersection_points_segments.push_back(r);
                 }
             }
             
         }
     }
 
-	vector<Point2f> merged_points = merge_close_points(intersectionPoints, 10);
+
+    // Merging the close intersection points
+    float r = 10.0f;
     float eps_dist_lines = 5.0f;
+
+	vector<Point2f> merged_points = merge_close_points(intersection_points_segments, r);
+    vector<Point2f> intersection_points;
+    // Drawing the points and keeping only the ones close to a line 
 	for (int i = 0; i < merged_points.size(); ++i) {
 		int x = (merged_points[i]).x;
 		int y = (merged_points[i]).y;
         vector<float> distances;
+
+        // Computing the distance to every line
         for (int k = 0 ; k < lines.size() ; k++){
             float rho = lines[k][0], theta = lines[k][1];
             float x1, x2, y1, y2;
@@ -116,27 +103,29 @@ int main(int argc, char** argv)
             float dist = abs((x2-x1)*(y1-y) - (x1-x)*(y2-y1))/sqrt(pow(x2-x1, 2) + pow(y2-y1, 2));
             distances.push_back(dist);
         }
+
+        // Keeping only the points close to a line
         if (*min_element(distances.begin(), distances.end()) <= eps_dist_lines){
-            circle(cdst, Point(x, y), 1, Scalar(255, 0, 0), 2);
-            circle(cdst, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
+            circle(im_hough_lines, Point(x, y), 1, Scalar(255, 0, 0), 2);
+            circle(im_hough_lines, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
+            intersection_points.push_back(Point2f(x, y));
         }
+
+        // Plotting the other points
         else{
-            circle(cdst, Point(x, y), 1, Scalar(0, 255, 0), 2);
-            circle(cdst, Point(x, y), 15 / 2, Scalar(0, 255, 0), 1);
+            circle(im_hough_lines, Point(x, y), 1, Scalar(0, 255, 0), 2);
+            circle(im_hough_lines, Point(x, y), 15 / 2, Scalar(0, 255, 0), 1);
         }
-		circle(cdstP, Point(x, y), 1, Scalar(255, 0, 0), 2);
-		circle(cdstP, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
+
+		circle(im_hough_segments, Point(x, y), 1, Scalar(255, 0, 0), 2);
+		circle(im_hough_segments, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
 	}
 
 
     // Show results
-    imshow("Source", src);
-    imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst);
-    imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP);
-    
-    
-    
-
+    imshow("Source", im_gray);
+    imshow("Detected Segments (in green) and points", im_hough_segments);
+    imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
     
     // Wait and Exit
     waitKey(0);

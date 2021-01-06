@@ -27,39 +27,39 @@ bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
 
 
 vector<Point2f> merge_close_points(const vector<Point2f> &p, float r) {
-	// Initialise les poids
+	// Initialization of the weights
 	vector<pair<Point2f, int>> points;
 	for (int i = 0; i < p.size(); ++i) {
 		points.push_back({p[i], 1});
 	}
 
-	// Pour chaque point...
+	// For each point
 	vector<int> list_invalid;
 	for (int i = 0; i < p.size(); ++i) {
-		// si le point a deja ete visite
+		// if the point has already been visited
 		if (find(list_invalid.begin(), list_invalid.end(), i) != list_invalid.end())
 			continue;
 
 		pair<Point2f, int> p1 = points[i];
 
-		// on cherche les points qui sont dans le rayon r
+		// We look for the points with a distance smaller than r
 		for (int j = 0; j < p.size(); ++j) {
-			// on ecarte les points invalides
+			// We discard the invalid points
 			if (i == j || find(list_invalid.begin(), list_invalid.end(), j) != list_invalid.end())
 				continue;
 			pair<Point2f, int> p2 = points[j];
 
-			// si p1 et p2 sont a une distance r
+			// If the distance between p1 and p2 is less than r
 			if (norm(p1.first-p2.first) <= r) {
 				points[i].first = (p1.first*p1.second + p2.first*p2.second) / (p1.second + p2.second); // p1 et p2 fusionnent
-				points[i].second += p2.second; // le poids de p1 augmente
-				list_invalid.push_back(j); // p2 devient invalide
-				points[j].second = 0; // permet de nettoyer plus tard
+				points[i].second += p2.second; // p1's weight increases
+				list_invalid.push_back(j); // p2 is invalidated
+				points[j].second = 0; // To clean up later
 			}
 		}
 	}
 
-	// nettoyage
+	// Clean up
 	vector<Point2f> ans;
 	for (int i = 0; i < points.size(); ++i) {
 		if (points[i].second != 0) {
