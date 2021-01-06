@@ -20,6 +20,19 @@ int main(int argc, char** argv)
 
     // Loads an image
     Mat im_gray = imread( samples::findFile( "data/saliere/test_1.jpg" ), IMREAD_GRAYSCALE );
+    Mat im_BGR = imread( samples::findFile( "data/saliere/test_1.jpg" ), IMREAD_COLOR );
+
+    if ( !im_gray.data )
+    {
+        std::cout<<"No image data"<< std::endl;
+        return -1;
+    }
+
+    // Convert CV_8UC3 to CV32FC3
+    im_BGR.convertTo(im_BGR, CV_32FC3, 1.0/255.0);
+    // Convert BGR image to HSV
+    Mat im_HSV;
+    cvtColor(im_BGR, im_HSV, COLOR_BGR2HSV);
 
     // Edge detection
     Canny(im_gray, canny_edges_gray, 50, 200, 3);
@@ -123,9 +136,12 @@ int main(int argc, char** argv)
 
 
     // Show results
-    imshow("Source", im_gray);
+    imshow("Source", im_BGR);
+    resizeWindow("Source", im_BGR.cols, im_BGR.rows);
     imshow("Detected Segments (in green) and points", im_hough_segments);
     imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
+    
+    find_pos(im_HSV, intersection_points);
     
     // Wait and Exit
     waitKey(0);
