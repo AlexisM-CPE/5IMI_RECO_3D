@@ -12,7 +12,6 @@ using namespace cv;
 using namespace std;
 
 
-
 int main(int argc, char** argv)
 {
     // Declare the output variables
@@ -63,29 +62,50 @@ int main(int argc, char** argv)
     vector<Vec4i> segments; // will hold the results of the detection
     HoughLinesP(canny_edges_gray, segments, 1, CV_PI/180, 50, 30, 10 ); // runs the actual detection
     
+    vector<float> angles = get_angles(segments);
+    vector<int> labels = kmeans(angles);
+
+
+    vector<Vec4i> segmentsV;
+    vector<Vec4i> segmentsH;
+
+    for (int k = 0 ; k < segments.size(); k++){
+        if (labels[k] == 1){
+            segmentsV.push_back(segments[k]);
+        }
+        else if (labels[k] == 0) {
+            segmentsH.push_back(segments[k]);
+        }
+
+    }
+
+
     // Draw the lines
-    for( size_t i = 0; i < segments.size(); i++ )
+    for( int i = 0; i < segmentsH.size(); i++ )
     {
-        Vec4i points_segment = segments[i];
+        Vec4i points_segment = segmentsH[i];
         line( im_hough_segments, Point(points_segment[0], points_segment[1]), Point(points_segment[2], points_segment[3]), Scalar(0,255,0), 3, LINE_AA);
     }
+    for( int i = 0; i < segmentsV.size(); i++ )
+    {
+        Vec4i points_segment = segmentsV[i];
+        line( im_hough_segments, Point(points_segment[0], points_segment[1]), Point(points_segment[2], points_segment[3]), Scalar(0,0,255), 3, LINE_AA);
+    }
+
     
     // Computing the intersections between the segments
     vector<Point2f> intersection_points_segments;
-    for (auto lineV : segments){
-        for (auto lineH : segments){
-            if (lineV != lineH){
-                Point2f o1(lineH[0], lineH[1]);
-                Point2f p1(lineH[2], lineH[3]);
-                Point2f o2(lineV[0], lineV[1]);
-                Point2f p2(lineV[2], lineV[3]);
-                Point2f r;;
+    for (auto lineV : segmentsV){
+        for (auto lineH : segmentsH){
+            Point2f o1(lineH[0], lineH[1]);
+            Point2f p1(lineH[2], lineH[3]);
+            Point2f o2(lineV[0], lineV[1]);
+            Point2f p2(lineV[2], lineV[3]);
+            Point2f r;
 
-                if (intersection(o1, p1, o2, p2, r)){
-                    intersection_points_segments.push_back(r);
-                }
+            if (intersection(o1, p1, o2, p2, r)){
+                intersection_points_segments.push_back(r);
             }
-            
         }
     }
 
@@ -119,6 +139,9 @@ int main(int argc, char** argv)
 
         // Keeping only the points close to a line
         if (*min_element(distances.begin(), distances.end()) <= eps_dist_lines){
+            circle(im_hough_segments, Point(x, y), 1, Scalar(255, 0, 0), 2);
+            circle(im_hough_lines, Point(x, y), 1, Scalar(255, 0, 0), 2);
+            circle(im_hough_segments, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
             
             circle(im_hough_lines, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
             int c = find_color(im_HSV, Point(x, y));
@@ -145,21 +168,20 @@ int main(int argc, char** argv)
 
         // Plotting the other points
         else{
-            circle(im_hough_lines, Point(x, y), 1, Scalar(0, 255, 0), 2);
-            circle(im_hough_lines, Point(x, y), 15 / 2, Scalar(0, 255, 0), 1);
+            circle(im_hough_segments, Point(x, y), 1, Scalar(255, 255, 0), 2);
+            circle(im_hough_segments, Point(x, y), 15 / 2, Scalar(255, 255, 0), 1);
         }
 
-		circle(im_hough_segments, Point(x, y), 1, Scalar(255, 0, 0), 2);
-		circle(im_hough_segments, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
+
+
 	}
 
 
     // Show results
     //imshow("Source", im_BGR);
     resizeWindow("Source", im_BGR.cols, im_BGR.rows);
-    //imshow("Detected Segments (in green) and points", im_hough_segments);
-    //imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
-    
+    imshow("Detected Segments (in green) and points", im_hough_segments);
+    imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
     find_pos(im_HSV, intersection_points);
     
     // Wait and Exit
