@@ -155,10 +155,10 @@ int main(int argc, char** argv)
 
 
     // Show results
-    imshow("Source", im_BGR);
+    //imshow("Source", im_BGR);
     resizeWindow("Source", im_BGR.cols, im_BGR.rows);
-    imshow("Detected Segments (in green) and points", im_hough_segments);
-    imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
+    //imshow("Detected Segments (in green) and points", im_hough_segments);
+    //imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
     
     find_pos(im_HSV, intersection_points);
     
