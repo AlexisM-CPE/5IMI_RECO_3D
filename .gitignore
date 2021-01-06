@@ -32,3 +32,16 @@ build/CMakeFiles/Tuto.dir/src/points_detection.cpp.o
 build/Makefile
 build/Tuto
 .vscode/settings.json
+build/CMakeFiles/projet.dir/build.make
+build/CMakeFiles/projet.dir/cmake_clean.cmake
+build/CMakeFiles/projet.dir/CXX.includecache
+build/CMakeFiles/projet.dir/depend.internal
+build/CMakeFiles/projet.dir/depend.make
+build/CMakeFiles/projet.dir/DependInfo.cmake
+build/CMakeFiles/projet.dir/flags.make
+build/CMakeFiles/projet.dir/link.txt
+build/CMakeFiles/projet.dir/progress.make
+build/CMakeFiles/projet.dir/src/grid_creation.cpp.o
+build/CMakeFiles/projet.dir/src/main.cpp.o
+build/CMakeFiles/projet.dir/src/points_detection.cpp.o
+build/projet

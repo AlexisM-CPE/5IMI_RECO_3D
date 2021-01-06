@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7.0)
 
-project(Tuto LANGUAGES C CXX)
+project(projet LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -39,7 +39,7 @@ else (WIN32)
 endif (WIN32)
 
 add_executable( 
-  Tuto
+  projet
   ${source_files}
   ${header_files}
 )
