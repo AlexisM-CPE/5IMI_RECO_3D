@@ -119,8 +119,27 @@ int main(int argc, char** argv)
 
         // Keeping only the points close to a line
         if (*min_element(distances.begin(), distances.end()) <= eps_dist_lines){
-            circle(im_hough_lines, Point(x, y), 1, Scalar(255, 0, 0), 2);
+            
             circle(im_hough_lines, Point(x, y), 15 / 2, Scalar(255, 0, 0), 1);
+            int c = find_color(im_HSV, Point(x, y));
+            switch(c)
+            {
+            case NO_COLOR:
+                circle(im_BGR, Point(x, y), 1, Scalar(0, 0, 0), 2);
+                break;
+            case MAGENTA:
+                circle(im_BGR, Point(x, y), 1, Scalar(255, 0, 255), 2);
+                break;
+            case YELLOW:
+                circle(im_BGR, Point(x, y), 1, Scalar(0, 255, 255), 2);
+                break;
+            case CYAN:
+                circle(im_BGR, Point(x, y), 1, Scalar(255, 255, 0), 2);
+                break;
+            case WHITE:
+                circle(im_BGR, Point(x, y), 1, Scalar(255, 255, 255), 2);
+                break;
+            }
             intersection_points.push_back(Point2f(x, y));
         }
 

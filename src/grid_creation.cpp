@@ -41,20 +41,26 @@ int find_color(Mat HSV, Point2f p)
     float H = H_tot/i;
     float S = S_tot/i;
     cout<<"H : "<<H<<" S : "<<S<<" i : "<<i<<endl;
-
-    if(S < 0.1f)
+    if(i < 150)
     {
-        return WHITE;
+        return NO_COLOR;
     }
-    if(abs(HSV_magenta.at<Vec3f>(0,0)[0]-H) < 30.0f)
+    else if(S < 0.4f)
+    {
+        if(S < 0.1f) 
+            return WHITE;
+        else
+            return NO_COLOR;
+    }
+    else if(abs(HSV_magenta.at<Vec3f>(0,0)[0]-H) < 40.0f)
     {
         return MAGENTA;
     }
-    else if(abs(HSV_yellow.at<Vec3f>(0,0)[0]-H) < 30.0f)
+    else if(abs(HSV_yellow.at<Vec3f>(0,0)[0]-H) < 40.0f)
     {
         return YELLOW;
     }
-    else if(abs(HSV_cyan.at<Vec3f>(0,0)[0]-H) < 30.0f)
+    else if(abs(HSV_cyan.at<Vec3f>(0,0)[0]-H) < 40.0f)
     {
         return CYAN;
     }
