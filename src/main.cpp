@@ -19,8 +19,8 @@ int main(int argc, char** argv)
     Mat canny_edges_gray, im_hough_lines, im_hough_segments;
 
     // Loads an image
-    Mat im_gray = imread( samples::findFile( "data/saliere/test_1.jpg" ), IMREAD_GRAYSCALE );
-    Mat im_BGR = imread( samples::findFile( "data/saliere/test_1.jpg" ), IMREAD_COLOR );
+    Mat im_gray = imread( samples::findFile( "data/saliere/1.jpg" ), IMREAD_GRAYSCALE );
+    Mat im_BGR = imread( samples::findFile( "data/saliere/1.jpg" ), IMREAD_COLOR );
 
     if ( !im_gray.data )
     {
