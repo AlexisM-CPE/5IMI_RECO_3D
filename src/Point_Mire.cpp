@@ -2,6 +2,7 @@
 
 #define grid_size 20.0f
 
+
 Point_Mire::Point_Mire()
     :index_mire_data(Point2i(0,0), coord_pix_data(Point2f(0.0f, 0.0f), coord_obj_data(Point2f(0.0f, 0.0f)), color_data(0){}
 
@@ -41,4 +42,33 @@ int const& Point_Mire::get_color_int()
 void Point_Mire::compute_coords()
 {
     coord_obj_data = Point2f(index_mire_data.x * grid_size, index_mire_data.y * grid_size);
+}
+
+
+
+std::vector<std::vector<cv::Point3f>> extract_object_points(std::vector<cv::Point_Mire*> points_grille)
+{
+    std::vector<cv::Point3f> vec;
+    for (Point_Mire* p : points_grille)
+    {
+        vec.push_back(p->get_coord_obj());
+    }
+    std::vector<std::vector<cv::Point3f>> output;
+    output.push_back(vec);
+    return output;
+}
+
+
+
+
+std::vector<std::vector<cv::Point2f>> extract_image_points(std::vector<cv::Point_Mire> points_grille)
+{
+    std::vector<cv::Point2f> vec;
+    for (Point_Mire* p : points_grille)
+    {
+        vec.push_back(p->get_coord_pix());
+    }
+    std::vector<std::vector<cv::Point2f>> output;
+    output.push_back(vec);
+    return output;
 }

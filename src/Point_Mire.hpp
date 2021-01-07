@@ -29,7 +29,8 @@ class Point_Mire
     
 }
 
-
+std::vector<std::vector<cv::Point3f>> extract_object_points(std::vector<cv::Point_Mire> points_grille);
+std::vector<std::vector<cv::Point2f>> extract_image_points(std::vector<cv::Point_Mire> points_grille);
 
 
 
