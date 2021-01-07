@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     HoughLines(canny_edges_gray, lines, 1, CV_PI/180, 150, 0, 0 ); // runs the actual detection
     
     // Draw the lines
-    for( size_t i = 0; i < lines.size(); i++ )
+    for( unsigned int i = 0; i < lines.size(); i++ )
     {
         float rho = lines[i][0], theta = lines[i][1];
         Point2f pt1, pt2;
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     vector<Vec4i> segmentsV;
     vector<Vec4i> segmentsH;
 
-    for (int k = 0 ; k < segments.size(); k++){
+    for ( unsigned int k = 0 ; k < segments.size(); k++){
         if (labels[k] == 1){
             segmentsV.push_back(segments[k]);
         }
@@ -81,12 +81,12 @@ int main(int argc, char** argv)
 
 
     // Draw the lines
-    for( int i = 0; i < segmentsH.size(); i++ )
+    for(  unsigned int i = 0; i < segmentsH.size(); i++ )
     {
         Vec4i points_segment = segmentsH[i];
         line( im_hough_segments, Point(points_segment[0], points_segment[1]), Point(points_segment[2], points_segment[3]), Scalar(0,255,0), 3, LINE_AA);
     }
-    for( int i = 0; i < segmentsV.size(); i++ )
+    for(  unsigned int i = 0; i < segmentsV.size(); i++ )
     {
         Vec4i points_segment = segmentsV[i];
         line( im_hough_segments, Point(points_segment[0], points_segment[1]), Point(points_segment[2], points_segment[3]), Scalar(0,0,255), 3, LINE_AA);
@@ -117,13 +117,13 @@ int main(int argc, char** argv)
 	vector<Point2f> merged_points = merge_close_points(intersection_points_segments, r);
     vector<Point2f> intersection_points;
     // Drawing the points and keeping only the ones close to a line 
-	for (int i = 0; i < merged_points.size(); ++i) {
+	for ( unsigned int i = 0; i < merged_points.size(); ++i) {
 		int x = (merged_points[i]).x;
 		int y = (merged_points[i]).y;
         vector<float> distances;
 
         // Computing the distance to every line
-        for (int k = 0 ; k < lines.size() ; k++){
+        for ( unsigned int k = 0 ; k < lines.size() ; k++){
             float rho = lines[k][0], theta = lines[k][1];
             float x1, x2, y1, y2;
             double a = cos(theta), b = sin(theta);
