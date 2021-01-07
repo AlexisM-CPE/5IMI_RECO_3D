@@ -29,13 +29,16 @@ int find_color(Mat HSV, Point2f p)
     {
         for(float k = -10; k < 10; k++)
         {
-            if(HSV.at<Vec3f>(p - Point2f(j,k))[2] > 0.44f)
+            Point2f p_temp = p - Point2f(j,k);
+            if(!((p_temp.x < 0)||(p_temp.y < 0)||(p_temp.y >= 846)||(p_temp.x >= 1504)))
             {
-                H_tot += HSV.at<Vec3f>(p - Point2f(j,k))[0];
-                S_tot += HSV.at<Vec3f>(p - Point2f(j,k))[1];
-                i++;
-            } 
-            
+                if (HSV.at<Vec3f>(p_temp)[2] > 0.44f)
+                {
+                    H_tot += HSV.at<Vec3f>(p_temp)[0];
+                    S_tot += HSV.at<Vec3f>(p_temp)[1];
+                    i++;
+                }
+            }
         }
     }
     float H = H_tot/i;
