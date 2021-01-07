@@ -27,10 +27,10 @@ class Point_Mire
         cv::Point2f coord_obj_data;     // Coords in mm in the object coordinate system
         int color_data;                 // number of the color -> 1 : magenta, 2 : yellow, 3 : cyan, 4 : white, 0 : undefined
     
-}
+};
 
-std::vector<std::vector<cv::Point3f>> extract_object_points(std::vector<cv::Point_Mire> points_grille);
-std::vector<std::vector<cv::Point2f>> extract_image_points(std::vector<cv::Point_Mire> points_grille);
+std::vector<std::vector<cv::Point3f>> extract_object_points(std::vector<Point_Mire*> points_grille);
+std::vector<std::vector<cv::Point2f>> extract_image_points(std::vector<Point_Mire*> points_grille);
 
 
 

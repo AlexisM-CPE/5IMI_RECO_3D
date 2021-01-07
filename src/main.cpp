@@ -1,5 +1,6 @@
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
+#include "Point_Mire.hpp"
 
 #include <iostream>
 #include <cmath>
