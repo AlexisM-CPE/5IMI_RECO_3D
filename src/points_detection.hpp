@@ -1,9 +1,7 @@
 #ifndef POINTS_DETECTION_HPP
 #define POINTS_DETECTION_HPP
 
-#include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
 
 #include <iostream>
 #include <cmath>

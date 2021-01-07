@@ -1,7 +1,3 @@
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
-
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
 

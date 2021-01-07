@@ -1,7 +1,6 @@
 #ifndef GRID_CREATION_HPP
 #define GRID_CREATION_HPP
 
-#include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 #include <iostream>
