@@ -90,16 +90,11 @@ void find_pos(Mat HSV, vector<Point2f> points)
             close_norm.erase(close_norm.begin());
             close_norm.erase(close_norm.begin() + 4, close_norm.end());
             bool verif = true;
-            for (int k = 0; k < 3; k++)
-            {
-                for(int l = 0; l < 4; l++)
-                {
-                    if (abs(close_norm[k].first - close_norm[k].first) > 7.0f)
-                        verif = false;
-                    if (find_color(HSV, points[close_norm[k].second]) != c)
-                        verif = false;
-                }
-            }
+            if (abs(close_norm[0].first - close_norm[3].first) > 7.0f)
+                verif = false;
+
+            if ((find_color(HSV, points[close_norm[0].second]) != c) || (find_color(HSV, points[close_norm[1].second]) != c) || (find_color(HSV, points[close_norm[2].second]) != c) || (find_color(HSV, points[close_norm[3].second]) != c))
+                verif = false;
             if(verif)
             {
                 for (int k = 0; k < 4; k++)
