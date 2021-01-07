@@ -1,9 +1,6 @@
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
-
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
+#include "Point_Mire.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -183,6 +180,23 @@ int main(int argc, char** argv)
     imshow("Detected Segments (in green) and points", im_hough_segments);
     imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
     find_pos(im_HSV, intersection_points);
+
+
+/**
+    vector<Point_Mire*>* points_grille = find_pos(im_HSV, intersection_points);
+
+    vector<vector<Point3f>> object_points = extract_object_points(*points_grille);
+    vector<vector<Point2f>> image_points = extract_image_points(*points_grille);
+
+    Mat cameraMatrix;
+    Mat distCoeffs;
+
+    vector<Mat> rvecs;
+    vector<Mat> tvecs;
+
+    calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
+*/
+    
     
     // Wait and Exit
     waitKey(0);

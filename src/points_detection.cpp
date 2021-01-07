@@ -5,7 +5,7 @@ using namespace std;
 
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
 {
-    float eps = 2.0f;       // We consider segments eps px longer to find more points
+    float eps = 2.0f; // We consider segments eps px longer to find more points
     Point2f x = o2 - o1;
     Point2f d1 = p1 - o1;
     Point2f d2 = p2 - o2;
