@@ -3,6 +3,19 @@
 using namespace cv;
 using namespace std;
 
+struct neighbour
+{
+    vector<pair<int, int>> case_color;
+};
+
+struct case_dir
+{
+    int north;
+    int south;
+    int east;
+    int west;
+};
+
 int find_color(Mat HSV, Point2f p)
 {
     Mat magenta(1,1,CV_32FC3);
@@ -93,24 +106,60 @@ void find_pos(Mat HSV, vector<Point2f> points)
             if (abs(close_norm[0].first - close_norm[3].first) > 7.0f)
                 verif = false;
 
-            if ((find_color(HSV, points[close_norm[0].second]) != c) || (find_color(HSV, points[close_norm[1].second]) != c) || (find_color(HSV, points[close_norm[2].second]) != c) || (find_color(HSV, points[close_norm[3].second]) != c))
+            if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))
                 verif = false;
             if(verif)
             {
+                neighbour nghbr;
+                case_dir case_d;
                 for (int k = 0; k < 4; k++)
                 {
                     Point2f dir = points[close_norm[k].second] - points[i];
                     int loop = 0;
                     bool stop = false;
+                    int dir_name = 0;
                     int test_fa = 0;
                     int test_tr = 0;
                     int color_tr = 0;
+                    bool false_find = false;
                     Point2f pc = points[i] + dir;
                     Point2f p_prev = points[i];
                     vector<pair<float, int>> close_point;
                     while(stop == false)
                     {
                         int color = find_color(HSV, pc);
+                        if((color != c) && (false_find == false))
+                        {
+                            false_find = true;
+                            float cos = dir.y / norm(dir);
+                            float sin = dir.x / norm(dir);
+                            if(abs(cos) > abs(sin))
+                            {
+                                if(cos > 0)
+                                {
+                                    case_d.east = loop + 1;
+                                    dir_name = EAST;
+                                }
+                                else
+                                {
+                                    case_d.west = loop + 1;
+                                    dir_name = WEST;
+                                }
+                            }
+                            else
+                            {
+                                if (sin > 0)
+                                {
+                                    case_d.north = loop + 1;
+                                    dir_name = NORTH;
+                                }
+                                else
+                                {
+                                    case_d.south = loop + 1;
+                                    dir_name = SOUTH;
+                                }
+                            }
+                        }
                         if (color == NO_COLOR)
                         {
                             test_fa += 1;
@@ -134,7 +183,7 @@ void find_pos(Mat HSV, vector<Point2f> points)
                         {
                             stop = true;
                         }
-                        loop += 1;
+                        
                         p_prev = pc;
                         pc += dir;
                         if ((pc.x >= 1504) || (pc.x < 0))
@@ -159,8 +208,80 @@ void find_pos(Mat HSV, vector<Point2f> points)
                             close_point.erase(close_point.begin(), close_point.end());
                             dir = pc - p_prev;
                         }
+                        loop += 1;
                     }
                     std::cout << points[i] << " nb loop : " << loop << " color : " << color_tr << std::endl;
+                    if (color_tr > NO_COLOR)
+                    {
+                        switch (dir_name)
+                        {
+                        case NORTH:
+                            nghbr.case_color.push_back(make_pair(case_d.north, color_tr));
+                            break;
+                        case SOUTH:
+                            nghbr.case_color.push_back(make_pair(case_d.south, color_tr));
+                            break;
+                        case EAST:
+                            nghbr.case_color.push_back(make_pair(case_d.east, color_tr));
+                            break;
+                        case WEST:
+                            nghbr.case_color.push_back(make_pair(case_d.west, color_tr));
+                            break;
+                        default:
+                            break;
+                        }
+                        
+                    }
+                }
+                std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+                if
+                if (nghbr.case_color.size() == 2)
+                {
+                    switch (c)
+                    {
+                    case MAGENTA:
+                        if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                        }
+                        else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
+                        }
+                        break;
+                    case YELLOW:
+                        if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
+                        }
+                        else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 + nghbr.case_color[1].first << std::endl;
+                        }
+                        break;
+                    case CYAN:
+                        if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
+                        }
+                        else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                        }
+                        break;
+                    case WHITE:
+                        if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                        }
+                        else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
+                        {
+                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }

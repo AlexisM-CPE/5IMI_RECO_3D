@@ -12,6 +12,11 @@
 #define CYAN     3
 #define WHITE    4
 
+#define NORTH 1
+#define SOUTH 2
+#define EAST 3
+#define WEST 4
+
 void find_pos(cv::Mat HSV, std::vector<cv::Point2f> points);
 int find_color(cv::Mat HSV, cv::Point2f p);
 

@@ -45,3 +45,6 @@ build/CMakeFiles/projet.dir/src/grid_creation.cpp.o
 build/CMakeFiles/projet.dir/src/main.cpp.o
 build/CMakeFiles/projet.dir/src/points_detection.cpp.o
 build/projet
+callgrind.out.3000
+build/CMakeFiles/Progress/count.txt
+build/CMakeFiles/Progress/1
