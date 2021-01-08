@@ -1,6 +1,7 @@
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
 #include "Point_Mire.hpp"
+#include <opencv2/calib3d.hpp>
 
 #include <iostream>
 #include <cmath>
