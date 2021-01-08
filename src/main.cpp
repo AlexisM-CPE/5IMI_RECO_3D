@@ -179,13 +179,11 @@ int main(int argc, char **argv)
     resizeWindow("Source", im_BGR.cols, im_BGR.rows);
     imshow("Detected Segments (in green) and points", im_hough_segments);
     imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
-    std::vector<Point_Mire *> test = find_pos(im_HSV, intersection_points);
+    std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
-    /**
-    vector<Point_Mire*>* points_grille = find_pos(im_HSV, intersection_points);
 
-    vector<vector<Point3f>> object_points = extract_object_points(*points_grille);
-    vector<vector<Point2f>> image_points = extract_image_points(*points_grille);
+    vector<vector<Point3f>> object_points = extract_object_points(points_grille);
+    vector<vector<Point2f>> image_points = extract_image_points(points_grille);
 
     Mat cameraMatrix;
     Mat distCoeffs;
@@ -194,22 +192,9 @@ int main(int argc, char **argv)
     vector<Mat> tvecs;
 
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
-*/
 
-/**
-    vector<Point_Mire*>* points_grille = find_pos(im_HSV, intersection_points);
+    std::cout << cameraMatrix << std::endl;
 
-    vector<vector<Point3f>> object_points = extract_object_points(*points_grille);
-    vector<vector<Point2f>> image_points = extract_image_points(*points_grille);
-
-    Mat cameraMatrix;
-    Mat distCoeffs;
-
-    vector<Mat> rvecs;
-    vector<Mat> tvecs;
-
-    calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
-*/
     // Wait and Exit
     waitKey(0);
     return 0;
