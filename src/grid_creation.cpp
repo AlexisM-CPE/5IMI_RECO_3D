@@ -8,29 +8,21 @@ struct neighbour
     vector<pair<int, int>> case_color;
 };
 
-struct case_dir
-{
-    int north;
-    int south;
-    int east;
-    int west;
-};
-
 int find_color(Mat HSV, Point2f p)
 {
-    Mat magenta(1,1,CV_32FC3);
+    Mat magenta(1, 1, CV_32FC3);
     Mat HSV_magenta;
-    magenta = Scalar(1.0f, 0, 1.0f); 
+    magenta = Scalar(1.0f, 0, 1.0f);
     cvtColor(magenta, HSV_magenta, COLOR_BGR2HSV);
 
-    Mat yellow(1,1,CV_32FC3);
+    Mat yellow(1, 1, CV_32FC3);
     Mat HSV_yellow;
-    yellow = Scalar(0.0f, 1.0f, 1.0f); 
+    yellow = Scalar(0.0f, 1.0f, 1.0f);
     cvtColor(yellow, HSV_yellow, COLOR_BGR2HSV);
 
-    Mat cyan(1,1,CV_32FC3);
+    Mat cyan(1, 1, CV_32FC3);
     Mat HSV_cyan;
-    cyan = Scalar(1.0f, 1.0f, 0.0f); 
+    cyan = Scalar(1.0f, 1.0f, 0.0f);
     cvtColor(cyan, HSV_cyan, COLOR_BGR2HSV);
     Vec3f hsv_color = HSV.at<Vec3f>(p);
 
@@ -38,12 +30,12 @@ int find_color(Mat HSV, Point2f p)
     float H_tot = 0.0f;
     float S_tot = 0.0f;
 
-    for(float j = -10; j < 10; j++)
+    for (float j = -10; j < 10; j++)
     {
-        for(float k = -10; k < 10; k++)
+        for (float k = -10; k < 10; k++)
         {
-            Point2f p_temp = p - Point2f(j,k);
-            if(!((p_temp.x < 0)||(p_temp.y < 0)||(p_temp.y >= 846)||(p_temp.x >= 1504)))
+            Point2f p_temp = p - Point2f(j, k);
+            if (is_in_img(p_temp))
             {
                 if (HSV.at<Vec3f>(p_temp)[2] > 0.44f)
                 {
@@ -54,28 +46,28 @@ int find_color(Mat HSV, Point2f p)
             }
         }
     }
-    float H = H_tot/i;
-    float S = S_tot/i;
-    if(i < 150)
+    float H = H_tot / i;
+    float S = S_tot / i;
+    if (i < 150)
     {
         return NO_COLOR;
     }
-    else if(S < 0.4f)
+    else if (S < 0.4f)
     {
-        if(S < 0.1f) 
+        if (S < 0.1f)
             return WHITE;
         else
             return NO_COLOR;
     }
-    else if(abs(HSV_magenta.at<Vec3f>(0,0)[0]-H) < 40.0f)
+    else if (abs(HSV_magenta.at<Vec3f>(0, 0)[0] - H) < 40.0f)
     {
         return MAGENTA;
     }
-    else if(abs(HSV_yellow.at<Vec3f>(0,0)[0]-H) < 40.0f)
+    else if (abs(HSV_yellow.at<Vec3f>(0, 0)[0] - H) < 40.0f)
     {
         return YELLOW;
     }
-    else if(abs(HSV_cyan.at<Vec3f>(0,0)[0]-H) < 40.0f)
+    else if (abs(HSV_cyan.at<Vec3f>(0, 0)[0] - H) < 40.0f)
     {
         return CYAN;
     }
@@ -83,20 +75,61 @@ int find_color(Mat HSV, Point2f p)
     {
         return NO_COLOR;
     }
-} 
+}
+
+bool is_in_img(cv::Point2f p)
+{
+    return ((p.x >= 0) && (p.y >= 0) && (p.y < 846) && (p.x < 1504));
+}
+
+int find_dir(Point2f dir, case_dir &case_d, int loop)
+{
+    int dir_name = 0;
+    float cos = dir.y / norm(dir);
+    float sin = dir.x / norm(dir);
+    if (abs(cos) > abs(sin))
+    {
+        if (cos > 0)
+        {
+            case_d.east = loop + 1;
+            dir_name = EAST;
+        }
+        else
+        {
+            case_d.west = loop + 1;
+            dir_name = WEST;
+        }
+    }
+    else
+    {
+        if (sin > 0)
+        {
+            case_d.north = loop + 1;
+            dir_name = NORTH;
+        }
+        else
+        {
+            case_d.south = loop + 1;
+            dir_name = SOUTH;
+        }
+    }
+    return dir_name;
+}
 
 void find_pos(Mat HSV, vector<Point2f> points)
 {
-    for(int i = 0; i < points.size(); i++)
+    for (int i = 0; i < points.size(); i++)
     {
-        int c = find_color(HSV, points[i]);
-        if(c != NO_COLOR)
+        Point_Image p_image = Point_Image(points[i]);
+        p_image.find_color_Point_Image(HSV);
+        int c = p_image.get_color_int();
+        if (c != NO_COLOR)
         {
             vector<pair<float, int>> close_norm;
             int j = 0;
             for (auto p : points)
             {
-                close_norm.push_back(make_pair(norm(p - points[i]), j));
+                close_norm.push_back(make_pair(norm(p - p_image.get_coord_pix()), j));
                 j++;
             }
             sort(close_norm.begin(), close_norm.end());
@@ -108,13 +141,13 @@ void find_pos(Mat HSV, vector<Point2f> points)
 
             if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))
                 verif = false;
-            if(verif)
+            if (verif)
             {
                 neighbour nghbr;
                 case_dir case_d;
                 for (int k = 0; k < 4; k++)
                 {
-                    Point2f dir = points[close_norm[k].second] - points[i];
+                    Point2f dir = points[close_norm[k].second] - p_image.get_coord_pix();
                     int loop = 0;
                     bool stop = false;
                     int dir_name = 0;
@@ -122,43 +155,16 @@ void find_pos(Mat HSV, vector<Point2f> points)
                     int test_tr = 0;
                     int color_tr = 0;
                     bool false_find = false;
-                    Point2f pc = points[i] + dir;
-                    Point2f p_prev = points[i];
+                    Point2f pc = p_image.get_coord_pix() + dir;
+                    Point2f p_prev = p_image.get_coord_pix();
                     vector<pair<float, int>> close_point;
-                    while(stop == false)
+                    while (stop == false)
                     {
                         int color = find_color(HSV, pc);
-                        if((color != c) && (false_find == false))
+                        if ((color != c) && (false_find == false))
                         {
                             false_find = true;
-                            float cos = dir.y / norm(dir);
-                            float sin = dir.x / norm(dir);
-                            if(abs(cos) > abs(sin))
-                            {
-                                if(cos > 0)
-                                {
-                                    case_d.east = loop + 1;
-                                    dir_name = EAST;
-                                }
-                                else
-                                {
-                                    case_d.west = loop + 1;
-                                    dir_name = WEST;
-                                }
-                            }
-                            else
-                            {
-                                if (sin > 0)
-                                {
-                                    case_d.north = loop + 1;
-                                    dir_name = NORTH;
-                                }
-                                else
-                                {
-                                    case_d.south = loop + 1;
-                                    dir_name = SOUTH;
-                                }
-                            }
+                            dir_name = find_dir(dir, case_d, loop);
                         }
                         if (color == NO_COLOR)
                         {
@@ -169,7 +175,7 @@ void find_pos(Mat HSV, vector<Point2f> points)
                             test_tr += 1;
                             test_fa = 0;
                         }
-                        else if(color != c)
+                        else if (color != c)
                         {
                             test_tr = 0;
                             color_tr = color;
@@ -183,18 +189,14 @@ void find_pos(Mat HSV, vector<Point2f> points)
                         {
                             stop = true;
                         }
-                        
+
                         p_prev = pc;
                         pc += dir;
-                        if ((pc.x >= 1504) || (pc.x < 0))
+                        if (!(is_in_img(pc)))
                         {
                             stop = true;
                         }
-                        if ((pc.y >= 846) || (pc.y < 0))
-                        {
-                            stop = true;
-                        }
-                        if(stop == false)
+                        if (stop == false)
                         {
                             j = 0;
                             for (auto p : points)
@@ -210,7 +212,7 @@ void find_pos(Mat HSV, vector<Point2f> points)
                         }
                         loop += 1;
                     }
-                    std::cout << points[i] << " nb loop : " << loop << " color : " << color_tr << std::endl;
+                    //std::cout << p_image.get_coord_pix() << " nb loop : " << loop << " color : " << color_tr << std::endl;
                     if (color_tr > NO_COLOR)
                     {
                         switch (dir_name)
@@ -230,11 +232,10 @@ void find_pos(Mat HSV, vector<Point2f> points)
                         default:
                             break;
                         }
-                        
                     }
                 }
-                std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
-                if
+                //std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+
                 if (nghbr.case_color.size() == 2)
                 {
                     switch (c)
@@ -242,41 +243,41 @@ void find_pos(Mat HSV, vector<Point2f> points)
                     case MAGENTA:
                         if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
                         {
-                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                            //std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
                         }
                         else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
                         {
-                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
+                            //std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
                         }
                         break;
                     case YELLOW:
                         if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
                         {
-                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
                         }
                         else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
                         {
-                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 + nghbr.case_color[1].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 + nghbr.case_color[1].first << std::endl;
                         }
                         break;
                     case CYAN:
                         if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
                         {
-                            std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
                         }
                         else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
                         {
-                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
                         }
                         break;
                     case WHITE:
                         if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
                         {
-                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
                         }
                         else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
                         {
-                            std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
+                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
                         }
                         break;
                     default:
