@@ -15,7 +15,7 @@ class Point_Mire
 
         cv::Point2i const& get_index_mire();
         cv::Point2f const& get_coord_pix();
-        cv::Point2f const& get_coord_obj();
+        cv::Point3f const& get_coord_obj();
         int const& get_color_int();
 
         void compute_coords();
@@ -24,7 +24,7 @@ class Point_Mire
     private:
         cv::Point2i index_mire_data;    // index in the grid
         cv::Point2f coord_pix_data;     // Coords in pix in the image
-        cv::Point2f coord_obj_data;     // Coords in mm in the object coordinate system
+        cv::Point3f coord_obj_data;     // Coords in mm in the object coordinate system
         int color_data;                 // number of the color -> 1 : magenta, 2 : yellow, 3 : cyan, 4 : white, 0 : undefined
     
 };

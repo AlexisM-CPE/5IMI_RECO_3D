@@ -4,16 +4,16 @@
 
 
 Point_Mire::Point_Mire()
-    :index_mire_data(Point2i(0,0), coord_pix_data(Point2f(0.0f, 0.0f), coord_obj_data(Point2f(0.0f, 0.0f)), color_data(0){}
+    :index_mire_data(Point2i(0,0)), coord_pix_data(Point2f(0.0f, 0.0f)), coord_obj_data(Point2f(0.0f, 0.0f)), color_data(0){}
 
 Point_Mire::Point_Mire(cv::Point2i index_mire_param, cv::Point2f coord_pix_param)
-    :index_mire_data(index_mire_param, coord_pix_data(coord_pix_param, coord_obj_data(Point2f(0.0f, 0.0f)), color_data(0)
+    :index_mire_data(index_mire_param), coord_pix_data(coord_pix_param), coord_obj_data(Point2f(0.0f, 0.0f)), color_data(0)
     {
         compute_coords();
     }
 
-Point_Mire::Point_Mire(cv::Point2i index_mire_param, cv::Point2f coord_pix_param, int color_param);
-    :index_mire_data(index_mire_param, coord_pix_data(coord_pix_param, coord_obj_data(Point2f(0.0f, 0.0f)), color_data(color_param)
+Point_Mire::Point_Mire(cv::Point2i index_mire_param, cv::Point2f coord_pix_param, int color_param)
+    :index_mire_data(index_mire_param), coord_pix_data(coord_pix_param), coord_obj_data(Point2f(0.0f, 0.0f))), color_data(color_param)
     {
         compute_coords();
     }
@@ -29,7 +29,7 @@ cv::Point2f const& Point_Mire::get_coord_pix()
     return coord_pix_data;
 }
 
-cv::Point2f const& Point_Mire::get_coord_obj()
+cv::Point3f const& Point_Mire::get_coord_obj()
 {
     return coord_obj_data;
 }
@@ -41,7 +41,7 @@ int const& Point_Mire::get_color_int()
 
 void Point_Mire::compute_coords()
 {
-    coord_obj_data = Point2f(index_mire_data.x * grid_size, index_mire_data.y * grid_size);
+    coord_obj_data = Point3f(index_mire_data.x * grid_size, index_mire_data.y * grid_size, 0.0f);
 }
 
 
