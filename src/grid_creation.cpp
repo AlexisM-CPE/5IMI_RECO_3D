@@ -24,7 +24,7 @@ int find_color(Mat HSV, Point2f p)
     Mat HSV_cyan;
     cyan = Scalar(1.0f, 1.0f, 0.0f);
     cvtColor(cyan, HSV_cyan, COLOR_BGR2HSV);
-    Vec3f hsv_color = HSV.at<Vec3f>(p);
+    //Vec3f hsv_color = HSV.at<Vec3f>(p);
 
     int i = 0;
     float H_tot = 0.0f;
@@ -116,9 +116,11 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
     return dir_name;
 }
 
-void find_pos(Mat HSV, vector<Point2f> points)
+std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 {
-    for (int i = 0; i < points.size(); i++)
+    int b = 0;
+    std::vector<Point_Mire *> vector_mire;
+    for (uint i = 0; i < points.size(); i++)
     {
         Point_Image p_image = Point_Image(points[i]);
         p_image.find_color_Point_Image(HSV);
@@ -158,14 +160,35 @@ void find_pos(Mat HSV, vector<Point2f> points)
                     Point2f pc = p_image.get_coord_pix() + dir;
                     Point2f p_prev = p_image.get_coord_pix();
                     vector<pair<float, int>> close_point;
+                    vector<Point_Image> points_in_lines;
+                    points_in_lines.push_back(p_image);
+
                     while (stop == false)
                     {
-                        int color = find_color(HSV, pc);
-                        if ((color != c) && (false_find == false))
+                        vector<float> mean_c = mean_color(points_in_lines);
+
+                        points_in_lines.push_back(Point_Image(pc));
+                        int idx_last_element = points_in_lines.size() - 1;
+                        points_in_lines[idx_last_element].find_color_Point_Image(HSV);
+                        vector<float> hsv_color = vector<float>{points_in_lines[idx_last_element].H(), points_in_lines[idx_last_element].S(), points_in_lines[idx_last_element].V()};
+                        int color = points_in_lines[idx_last_element].get_color_int();
+                        if (p_image.get_color_int() == WHITE)
                         {
-                            false_find = true;
-                            dir_name = find_dir(dir, case_d, loop);
+                            if ((abs(hsv_color[1] - mean_c[1]) > 0.02f) && (false_find == false))
+                            {
+                                false_find = true;
+                                dir_name = find_dir(dir, case_d, loop);
+                            }
                         }
+                        else if (p_image.get_color_int() != WHITE)
+                        {
+                            if ((abs(hsv_color[0] - mean_c[0]) > 5.0f) && (false_find == false))
+                            {
+                                false_find = true;
+                                dir_name = find_dir(dir, case_d, loop);
+                            }
+                        }
+
                         if (color == NO_COLOR)
                         {
                             test_fa += 1;
@@ -234,57 +257,111 @@ void find_pos(Mat HSV, vector<Point2f> points)
                         }
                     }
                 }
-                //std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
 
-                if (nghbr.case_color.size() == 2)
+                if ((case_d.north + case_d.south == 8) && (case_d.north + case_d.south == 8))
                 {
-                    switch (c)
+                    if (nghbr.case_color.size() == 2)
                     {
-                    case MAGENTA:
-                        if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
+                        //std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+                        int coord_x = 0;
+                        int coord_y = 0;
+                        switch (c)
                         {
-                            //std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
+                        case MAGENTA:
+                            if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
+                            {
+                                coord_x = 8 - nghbr.case_color[0].first;
+                                coord_y = 8 - nghbr.case_color[1].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
+                            {
+                                coord_x = 8 - nghbr.case_color[1].first;
+                                coord_y = 8 - nghbr.case_color[0].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            break;
+                        case YELLOW:
+                            if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
+                            {
+                                coord_x = 8 + nghbr.case_color[1].first;
+                                coord_y = 8 + nghbr.case_color[0].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
+                            {
+                                coord_x = 8 + nghbr.case_color[0].first;
+                                coord_y = 8 + nghbr.case_color[1].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            break;
+                        case CYAN:
+                            if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
+                            {
+                                coord_x = 8 - nghbr.case_color[1].first;
+                                coord_y = 8 + nghbr.case_color[0].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
+                            {
+                                coord_x = 8 + nghbr.case_color[0].first;
+                                coord_y = 8 - nghbr.case_color[1].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            break;
+                        case WHITE:
+                            if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
+                            {
+                                coord_x = 8 + nghbr.case_color[0].first;
+                                coord_y = 8 - nghbr.case_color[1].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
+                            {
+                                coord_x = 8 + nghbr.case_color[1].first;
+                                coord_y = 8 - nghbr.case_color[0].first;
+                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
+                                p_mire->compute_coords();
+                                vector_mire.push_back(p_mire);
+                                b++;
+                            }
+                            break;
+                        default:
+                            break;
                         }
-                        else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
-                        {
-                            //std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
-                        }
-                        break;
-                    case YELLOW:
-                        if ((nghbr.case_color[0].second == WHITE) && (nghbr.case_color[1].second == CYAN))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
-                        }
-                        else if ((nghbr.case_color[1].second == WHITE) && (nghbr.case_color[0].second == CYAN))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 + nghbr.case_color[1].first << std::endl;
-                        }
-                        break;
-                    case CYAN:
-                        if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 - nghbr.case_color[1].first << " coord y : " << 8 + nghbr.case_color[0].first << std::endl;
-                        }
-                        else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
-                        }
-                        break;
-                    case WHITE:
-                        if ((nghbr.case_color[0].second == MAGENTA) && (nghbr.case_color[1].second == YELLOW))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[0].first << " coord y : " << 8 - nghbr.case_color[1].first << std::endl;
-                        }
-                        else if ((nghbr.case_color[1].second == MAGENTA) && (nghbr.case_color[0].second == YELLOW))
-                        {
-                            // std::cout << points[i] << " coord x : " << 8 + nghbr.case_color[1].first << " coord y : " << 8 - nghbr.case_color[0].first << std::endl;
-                        }
-                        break;
-                    default:
-                        break;
                     }
                 }
             }
         }
     }
+    return vector_mire;
 }

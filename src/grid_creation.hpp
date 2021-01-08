@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include "Point_Image.hpp"
+#include "Point_Mire.hpp"
 
 #define NO_COLOR 0
 #define MAGENTA 1
@@ -25,7 +26,7 @@ struct case_dir
     int west;
 };
 
-void find_pos(cv::Mat HSV, std::vector<cv::Point2f> points);
+std::vector<Point_Mire *> find_pos(cv::Mat HSV, std::vector<cv::Point2f> points);
 int find_color(cv::Mat HSV, cv::Point2f p);
 int find_dir(cv::Point2f dir, struct case_dir &case_d, int loop);
 bool is_in_img(cv::Point2f p);

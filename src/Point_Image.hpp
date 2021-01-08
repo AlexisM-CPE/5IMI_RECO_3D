@@ -36,4 +36,5 @@ private:
     float V_data;               // Average Value around the pixel
 };
 
+std::vector<float> mean_color(std::vector<Point_Image> points_in_lines);
 #endif

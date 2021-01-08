@@ -44,7 +44,7 @@ float const &Point_Image::V() const
 
 void Point_Image::find_color_Point_Image(cv::Mat HSV)
 {
-    cv::Vec3f hsv_color = HSV.at<cv::Vec3f>(coord_pix_data);
+    //cv::Vec3f hsv_color = HSV.at<cv::Vec3f>(coord_pix_data);
 
     int i = 0;
     float H_tot = 0.0f;
@@ -56,12 +56,15 @@ void Point_Image::find_color_Point_Image(cv::Mat HSV)
         for (float k = -10; k < 10; k++)
         {
             cv::Point2f p_temp = coord_pix_data - cv::Point2f(j, k);
-            if (!((p_temp.x < 0) || (p_temp.y < 0) || (p_temp.y >= 846) || (p_temp.x >= 1504)))
+            if (is_in_img(p_temp))
             {
-                H_tot += HSV.at<cv::Vec3f>(p_temp)[0];
-                S_tot += HSV.at<cv::Vec3f>(p_temp)[1];
-                V_tot += HSV.at<cv::Vec3f>(p_temp)[2];
-                i++;
+                if (HSV.at<cv::Vec3f>(p_temp)[2] > 0.44f)
+                {
+                    H_tot += HSV.at<cv::Vec3f>(p_temp)[0];
+                    S_tot += HSV.at<cv::Vec3f>(p_temp)[1];
+                    V_tot += HSV.at<cv::Vec3f>(p_temp)[2];
+                    i++;
+                }
             }
         }
     }
@@ -71,4 +74,21 @@ void Point_Image::find_color_Point_Image(cv::Mat HSV)
     V_data = V_tot / i;
 
     color_data = find_color(HSV, coord_pix_data);
+}
+
+std::vector<float> mean_color(std::vector<Point_Image> points_in_lines)
+{
+    float H_tot = 0.0f;
+    float S_tot = 0.0f;
+    float V_tot = 0.0f;
+    uint i = 0;
+
+    for (auto p : points_in_lines)
+    {
+        H_tot += p.H();
+        S_tot += p.S();
+        V_tot += p.V();
+        i++;
+    }
+    return std::vector<float>{H_tot / i, S_tot / i, V_tot / i};
 }
