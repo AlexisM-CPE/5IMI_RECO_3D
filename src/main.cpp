@@ -175,25 +175,50 @@ int main(int argc, char **argv)
     }
 
     // Show results
-    imshow("Source", im_BGR);
-    resizeWindow("Source", im_BGR.cols, im_BGR.rows);
-    imshow("Detected Segments (in green) and points", im_hough_segments);
-    imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
+    //imshow("Source", im_BGR);
+    //resizeWindow("Source", im_BGR.cols, im_BGR.rows);
+    //imshow("Detected Segments (in green) and points", im_hough_segments);
+    //imshow("Detected Lines (in red), usefull points (in blue) and discarded points (in green)", im_hough_lines);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
 
     vector<vector<Point3f>> object_points = extract_object_points(points_grille);
     vector<vector<Point2f>> image_points = extract_image_points(points_grille);
 
-    Mat cameraMatrix;
+    Mat cameraMatrix(3, 3, CV_32FC1);
+
+
+    cameraMatrix.at<float>(0,2) = im_BGR.rows/2;
+    cameraMatrix.at<float>(1,2) = im_BGR.cols/2;
+
+    float f = 4;
+    float s = 0.0014;
+
+    cameraMatrix.at<float>(2,2) = 1;
+    cameraMatrix.at<float>(1,1) = f/s;
+    cameraMatrix.at<float>(0,0) = f/s;
+
+
+    //Mat cameraMatrix;
     Mat distCoeffs;
 
     vector<Mat> rvecs;
     vector<Mat> tvecs;
 
-    calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
+    
+    calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
 
-    std::cout << cameraMatrix << std::endl;
+    Mat image_points_output;
+    Mat jacobian;
+    double aspectRatio = 16/9;
+
+    projectPoints(object_points.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_points_output, jacobian, aspectRatio);
+
+    for (int i = 0 ; i < image_points_output.rows ; i++){
+        auto p = image_points_output.at<Point2f>(i);
+        circle(im_BGR, Point(p.x, p.y), 1, Scalar(0, 255, 0), 2);
+        imshow("Source", im_BGR);
+    }
 
     // Wait and Exit
     waitKey(0);
