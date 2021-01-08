@@ -258,7 +258,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                     }
                 }
 
-                if ((case_d.north + case_d.south == 8) && (case_d.north + case_d.south == 8))
+                if ((case_d.north + case_d.south == 8) && (case_d.east + case_d.west == 8))
                 {
                     if (nghbr.case_color.size() == 2)
                     {
