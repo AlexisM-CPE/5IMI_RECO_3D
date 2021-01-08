@@ -182,7 +182,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         }
                         else if (p_image.get_color_int() != WHITE)
                         {
-                            if ((abs(hsv_color[0] - mean_c[0]) > 5.0f) && (false_find == false))
+                            if (((abs(hsv_color[0] - mean_c[0]) > 8.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.2f)) && (false_find == false))
                             {
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
