@@ -196,6 +196,20 @@ int main(int argc, char **argv)
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
 */
 
+/**
+    vector<Point_Mire*>* points_grille = find_pos(im_HSV, intersection_points);
+
+    vector<vector<Point3f>> object_points = extract_object_points(*points_grille);
+    vector<vector<Point2f>> image_points = extract_image_points(*points_grille);
+
+    Mat cameraMatrix;
+    Mat distCoeffs;
+
+    vector<Mat> rvecs;
+    vector<Mat> tvecs;
+
+    calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs);
+*/
     // Wait and Exit
     waitKey(0);
     return 0;
