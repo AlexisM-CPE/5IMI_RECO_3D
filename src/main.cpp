@@ -1,6 +1,7 @@
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
 #include "Point_Mire.hpp"
+#include "features_extraction.hpp"
 #include <opencv2/calib3d.hpp>
 
 #include <iostream>
@@ -217,6 +218,12 @@ int main(int argc, char **argv)
         imshow("Source", im_BGR);
     }
 
+    Mat imageKey;
+    std::vector<cv::KeyPoint> feat = extract_features(im_gray, 100000);
+
+    //FAST(image, &keypointsD, threshold, true);
+    drawKeypoints(im_gray, feat, imageKey);
+    imshow("keypoints", imageKey);
     // Wait and Exit
     waitKey(0);
     return 0;
