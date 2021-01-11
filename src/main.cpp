@@ -16,8 +16,8 @@ int main(int argc, char **argv)
     Mat canny_edges_gray, im_hough_lines, im_hough_segments;
 
     // Loads an image
-    Mat im_gray = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_GRAYSCALE);
-    Mat im_BGR = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_COLOR);
+    Mat im_gray = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_GRAYSCALE);
+    Mat im_BGR = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_COLOR);
 
     if (!im_gray.data)
     {
@@ -184,7 +184,6 @@ int main(int argc, char **argv)
 
     vector<vector<Point3f>> object_points = extract_object_points(points_grille);
     vector<vector<Point2f>> image_points = extract_image_points(points_grille);
-
     Mat cameraMatrix(3, 3, CV_32FC1);
 
     cameraMatrix.at<float>(0, 2) = im_BGR.rows / 2;
@@ -203,20 +202,78 @@ int main(int argc, char **argv)
     vector<Mat> rvecs;
     vector<Mat> tvecs;
 
+    Mat rot(3,3,CV_64F);
+    Mat rot_tr(3,3,CV_64F);
+    
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
+
+    Rodrigues(rvecs[0], rot);
+    transpose(rot, rot_tr);
+
+    Mat pos_camera(3,3,CV_64F);
+
+    pos_camera = -rot_tr*tvecs[0];
+
+    Mat t_obj(3,3,CV_64F);
+    t_obj = -rot*pos_camera;
+
+
+    std::cout << "____" << std::endl;
+    std::cout << t_obj.at<double>(0,0) << std::endl;
+    std::cout << t_obj.at<double>(1,0) << std::endl;
+    std::cout << t_obj.at<double>(2,0) << std::endl;
+    std::cout << "____" << std::endl;
+
+    std::cout << tvecs[0].at<double>(0,0) << std::endl;
+    std::cout << tvecs[0].at<double>(1,0) << std::endl;
+    std::cout << tvecs[0].at<double>(2,0) << std::endl;
+    std::cout << "____" << std::endl;
+
+    float phi = - atan(rot_tr.at<double>(1,2)/rot_tr.at<double>(2,2));
+    float gamma = - atan(rot_tr.at<double>(0,1)/rot_tr.at<double>(0,0));
+    float omega = atan(rot_tr.at<double>(0,2)/(-rot_tr.at<double>(1,2)*sin(phi) + rot_tr.at<double>(2,2)*cos(phi)));
+
+    std::cout << "Phi : " <<  phi << std::endl;
+    std::cout << "Gamma : " << gamma << std::endl;
+    std::cout << "Omega : " << omega << std::endl;
+    std::cout << "____" << std::endl;
+
+
+    std::cout << "X : " << pos_camera.at<double>(0,0) << std::endl;
+    std::cout << "Y : " << pos_camera.at<double>(1,0) << std::endl;
+    std::cout << "Z : " << pos_camera.at<double>(2,0) << std::endl;
+
 
     Mat image_points_output;
     Mat jacobian;
     double aspectRatio = 16 / 9;
 
+    Point3f p_c = Point3f(pos_camera.at<double>(0,0), pos_camera.at<double>(1,0), pos_camera.at<double>(2,0));
+    Point3f d = Point3f(8*12.4, 8*12.4, 0.0f) - p_c;
+    Point3f p_c2 = p_c + d/10.0f;
+
+    object_points[0].push_back(p_c2);
+
+
+
     projectPoints(object_points.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_points_output, jacobian, aspectRatio);
 
-    for (int i = 0; i < image_points_output.rows; i++)
+
+
+
+
+    for (int i = 0; i < image_points_output.rows - 1; i++)
     {
         auto p = image_points_output.at<Point2f>(i);
         circle(im_BGR, Point(p.x, p.y), 1, Scalar(0, 255, 0), 2);
         imshow("Source", im_BGR);
+
     }
+
+
+    auto p = image_points_output.at<Point2f>(image_points_output.rows - 1);
+    circle(im_BGR, Point(p.x, p.y), 1, Scalar(0, 0, 255), 5);
+    imshow("Source", im_BGR);
 
     Mat imageKey;
     std::vector<cv::KeyPoint> feat = extract_features(im_gray, 100000);
