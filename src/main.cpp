@@ -17,6 +17,7 @@ int main(int argc, char **argv)
 
     // Loads an image
     Mat im_gray = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_GRAYSCALE);
+    Mat im_gray2 = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_GRAYSCALE);
     Mat im_BGR = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_COLOR);
 
     if (!im_gray.data)
@@ -276,11 +277,18 @@ int main(int argc, char **argv)
     imshow("Source", im_BGR);
 
     Mat imageKey;
-    std::vector<cv::KeyPoint> feat = extract_features(im_gray, 100000);
+    std::vector<cv::KeyPoint> feat = extract_features(im_gray, 1000);
 
     //FAST(image, &keypointsD, threshold, true);
     drawKeypoints(im_gray, feat, imageKey);
+
+    Ptr<StereoSGBM> BMState = cv::StereoSGBM::create(0, 8 * 16, 3, 200, 400, 0, 15, 7, 200, 2, StereoSGBM::MODE_HH);
+    BMState->compute(im_gray, im_gray2, imageKey);
+    //imageKey = (imageKey - min) * 255 / (max - min);
+    //cv::normalize(imageKey, imageKey, 0, 256, CV_MMX);
+    normalize(imageKey, imageKey, 0, 255, NORM_MINMAX, CV_8U);
     imshow("keypoints", imageKey);
+
     // Wait and Exit
     waitKey(0);
     return 0;
