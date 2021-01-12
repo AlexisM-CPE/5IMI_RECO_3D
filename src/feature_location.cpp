@@ -42,17 +42,26 @@ cv::Mat compute_transition_matrix(cv::Mat M_int, cv::Mat M_ext)
     return M_trans;
 }
 
-cv::Point3f get_camera_position(std::vector<cv::Mat> rvecs, std::vector<cv::Mat> tvecs)
+cv::Point3f get_camera_position(cv::Mat M_ext)
 {
     cv::Point3f camera_pos;
     cv::Mat rot(3,3,CV_64F);
+    cv::Mat t(3,1,CV_64F);
     cv::Mat rot_tr(3,3,CV_64F);
     cv::Mat pos_camera(3,1,CV_64F);
 
-    Rodrigues(rvecs[0], rot);
+    for (int i = 0 ; i < 3 ; i++)
+    {
+        for (int j = 0 ; j < 3 ; j++)
+        {
+            rot.at<double>(i,j) = M_ext.at<double>(i,j);
+        }
+        t.at<double>(i,0) = M_ext.at<double>(i,3);
+    }
+
     transpose(rot, rot_tr);
 
-    pos_camera = -rot_tr*tvecs[0];
+    pos_camera = -rot_tr*t;
 
     camera_pos.x = pos_camera.at<double>(0,0);
     camera_pos.y = pos_camera.at<double>(1,0);
@@ -60,6 +69,7 @@ cv::Point3f get_camera_position(std::vector<cv::Mat> rvecs, std::vector<cv::Mat>
 
     return camera_pos;
 }
+
 
 cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
 {
@@ -82,16 +92,6 @@ cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
 
     cv::Mat M_trans_2d_inv(3,3,CV_64F);
     M_trans_2d_inv = M_trans_2d.inv();
-
-/*
-    for (int i = 0 ; i < 3 ; i++ )
-    {
-        for (int j = 0 ;  j < 3 ; j++)
-        {
-            std::cout << M_trans_2d_inv.at<double>(i,j) << "   ";
-        }
-        std::cout << std::endl;
-    }*/
 
     mat_world = M_trans_2d_inv * mat_image;
 
