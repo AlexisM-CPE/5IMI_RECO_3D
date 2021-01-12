@@ -4,6 +4,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 
-std::vector<cv::KeyPoint> extract_features(cv::Mat image, int threshold);
+void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, int threshold);
 
 #endif
