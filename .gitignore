@@ -48,3 +48,8 @@ build/projet
 callgrind.out.3000
 build/CMakeFiles/Progress/count.txt
 build/CMakeFiles/Progress/1
+*.o
+build/CMakeFiles/projet.dir/src/features_extraction.cpp.o
+build/CMakeFiles/projet.dir/src/Point_Image.cpp.o
+build/CMakeFiles/projet.dir/src/Point_Mire.cpp.o
+build/CMakeFiles/Progress/3
