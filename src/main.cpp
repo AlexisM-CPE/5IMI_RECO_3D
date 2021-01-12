@@ -219,18 +219,20 @@ int main(int argc, char **argv)
         imshow("Source", im_BGR);
     }
 
-    Mat imageKey;
-    std::vector<cv::KeyPoint> feat = extract_features(im_gray, 1000);
+    Mat imageo1, imageo2;
+    extract_features(im_gray, im_gray2, &imageo1, &imageo2, 1000);
 
-    //FAST(image, &keypointsD, threshold, true);
-    drawKeypoints(im_gray, feat, imageKey);
+    // //FAST(image, &keypointsD, threshold, true);
+    // drawKeypoints(im_gray, feat, imageKey);
 
-    Ptr<StereoSGBM> BMState = cv::StereoSGBM::create(0, 8 * 16, 3, 200, 400, 0, 15, 7, 200, 2, StereoSGBM::MODE_HH);
-    BMState->compute(im_gray, im_gray2, imageKey);
+    // Ptr<StereoSGBM> BMState = cv::StereoSGBM::create(0, 8 * 16, 3, 200, 400, 0, 15, 7, 200, 2, StereoSGBM::MODE_HH);
+    // BMState->compute(im_gray, im_gray2, imageKey);
     //imageKey = (imageKey - min) * 255 / (max - min);
     //cv::normalize(imageKey, imageKey, 0, 256, CV_MMX);
-    normalize(imageKey, imageKey, 0, 255, NORM_MINMAX, CV_8U);
-    imshow("keypoints", imageKey);
+    //normalize(imageKey, imageKey, 0, 255, NORM_MINMAX, CV_8U);
+    imshow("keypoints", imageo1);
+
+    imshow("keypoints2", imageo2);
 
     // Wait and Exit
     waitKey(0);
