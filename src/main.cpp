@@ -5,6 +5,8 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
 
+#include "feature_location.hpp"
+
 #include <iostream>
 #include <cmath>
 
@@ -213,7 +215,7 @@ int main(int argc, char **argv)
     Rodrigues(rvecs[0], rot);
     transpose(rot, rot_tr);
 
-    Mat pos_camera(3,3,CV_64F);
+    Mat pos_camera(3,1,CV_64F);
 
     pos_camera = -rot_tr*tvecs[0];
 
@@ -245,6 +247,30 @@ int main(int argc, char **argv)
     std::cout << "X : " << pos_camera.at<double>(0,0) << std::endl;
     std::cout << "Y : " << pos_camera.at<double>(1,0) << std::endl;
     std::cout << "Z : " << pos_camera.at<double>(2,0) << std::endl;
+
+
+
+
+    Mat M_int_2 = create_M_int(cameraMatrix);
+    Mat M_ext_2 = create_M_ext(rvecs, tvecs);
+    Mat M_trans = compute_transition_matrix(M_int_2, M_ext_2);
+    Point3f cam_pos_2 = get_camera_position(rvecs, tvecs);
+
+    Point2f pt_8_1_image(512, 251);
+    Point2f pt_15_8_image(613, 589);
+
+    Point3f pt_15_8_world = image_to_grid_plan(pt_15_8_image, M_trans);
+
+    std::cout << "camera X v2 : " << cam_pos_2.x << std::endl;
+    std::cout << "camera Y v2 : " << cam_pos_2.y << std::endl;
+    std::cout << "camera Z v2 : " << cam_pos_2.z << std::endl;
+
+    std::cout << "Point X v2 : " << pt_15_8_world.x/12.4f << std::endl;
+    std::cout << "Point Y v2 : " << pt_15_8_world.y/12.4f << std::endl;
+    std::cout << "Point Z v2 : " << pt_15_8_world.z << std::endl;
+
+
+
 
 
     Mat image_points_output;
@@ -374,13 +400,10 @@ int main(int argc, char **argv)
 		match2.push_back(matches[i][1]);
 	}
 
-    std::cout << "Salut 1" << std::endl;
-
     Mat img_matches1, img_matches2;
 	drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match1, img_matches1);
 	drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match2, img_matches2);
 
-    std::cout << "Salut 2" << std::endl;
 	imshow("test2", img_matches1);
 	imshow("test4", img_matches2);
 
