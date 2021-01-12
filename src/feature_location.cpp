@@ -107,9 +107,9 @@ cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
     return point_world;
 }
 
-cv::Point2f find_intersection(cv::Point2f feature_world_2d_1, cv::Point2f cam_proj_1, cv::Point2f feature_world_2d_2, cv::Point2f cam_proj_2)
+cv::Point3f find_intersection(cv::Point3f feature_world_2d_1, cv::Point3f cam_proj_1, cv::Point3f feature_world_2d_2, cv::Point3f cam_proj_2)
 {
-    cv::Point3f intersection;
+    cv::Point3f intersection(-1000.0f, -1000.0f, -1000.0f);
     
     float x1 = feature_world_2d_1.x;
     float x2 = feature_world_2d_2.x;
@@ -129,6 +129,9 @@ cv::Point2f find_intersection(cv::Point2f feature_world_2d_1, cv::Point2f cam_pr
     float gamma1 = cam_proj_1.z - feature_world_2d_1.z;
     float gamma2 = cam_proj_2.z - feature_world_2d_2.z;
 
+    float norm_1 = sqrt(pow(alpha1, 2) + pow(beta1, 2) + pow(gamma1, 2));
+    float norm_2 = sqrt(pow(alpha2, 2) + pow(beta2, 2) + pow(gamma2, 2));
+
     cv::Mat M(2,2, CV_64F);
     cv::Mat T(2,1, CV_64F);
     cv::Mat X(2,1, CV_64F);
@@ -136,40 +139,51 @@ cv::Point2f find_intersection(cv::Point2f feature_world_2d_1, cv::Point2f cam_pr
     X.at<double>(0,0) = x2-x1;
     X.at<double>(1,0) = y2-y1;
 
-    M.at<double>(0,0) = alpha1;
-    M.at<double>(0,1) = - alpha2;
-    M.at<double>(1,0) = bata1;
-    M.at<double>(1,1) = - beta2;
+    M.at<double>(0,0) = alpha1/norm_1;
+    M.at<double>(0,1) = - alpha2/norm_2;
+    M.at<double>(1,0) = beta1/norm_1;
+    M.at<double>(1,1) = - beta2/norm_2;
 
     cv::Mat M_inv = M.inv();
 
     T = M_inv*X;
 
-    if (z1 + gamma1*T.at<double>(0,0) != z2 + gamma2*T.at<double>(1,0))
+    if (z1 + gamma1/norm_1*T.at<double>(0,0) != z2 + gamma2/norm_2*T.at<double>(1,0))
     {
         std::cout << "No intersection" << std::endl;
         return intersection;
     }
 
     float t = T.at<double>(0,0);
-    intersection.x = x1 + alpha1*t;
-    intersection.y = y1 + beta1*t;
-    intersection.z = z1 + gamma1*t;
+    intersection.x = x1 + alpha1/norm_1*t;
+    intersection.y = y1 + beta1/norm_1*t;
+    intersection.z = z1 + gamma1/norm_1*t;
 
-    return 
+    return intersection;
 }
 
-cv::Point3f find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos_1, cv::Point3f cam_pos_2, cv::Mat M_transition)
+std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos_1, cv::Point3f cam_pos_2, cv::Mat M_transition)
 {
-    cv::Point2f cam_proj_1(cam_pos_1.x, camp_pos_1.y);
-    cv::Point2f cam_proj_2(cam_pos_2.x, camp_pos_2.y);
+    cv::Point3f cam_proj_1(cam_pos_1.x, cam_pos_1.y, 0.0f);
+    cv::Point3f cam_proj_2(cam_pos_2.x, cam_pos_2.y, 0.0f);
+    std::vector<cv::Point3f> features;
+    for (int i = 0 ; i < features_im1.size() ; i++)
+    {
+        cv::Point3f feature_world_1 = image_to_grid_plan(features_im1[i], M_transition);
+        cv::Point3f feature_world_2 = image_to_grid_plan(features_im2[i], M_transition);
 
-    cv::Point3f feature_world_1 = image_to_grid_plan(features_im1, M_transition);
-    cv::Point3f feature_world_2 = image_to_grid_plan(features_im2, M_transition);
+        cv::Point3f feature_world_2d_1(feature_world_1.x, feature_world_1.y, feature_world_1.z);
+        cv::Point3f feature_world_2d_2(feature_world_2.x, feature_world_2.y, feature_world_2.z);
 
-    cv::Point2f feature_world_2d_1(feature_world_1.x, feature_world_1.y);
-    cv::Point2f feature_world_2d_2(feature_world_2.x, feature_world_2.y);
+        cv::Point3f feature_proj = find_intersection(feature_world_2d_1, cam_proj_1, feature_world_2d_2, cam_proj_2);
 
-    cv::Point2f feature_proj = find_intersection(feature_world_2d_1, cam_proj_1, feature_world_2d_2, cam_proj_2);
+        cv::Point3f feature_1 = find_intersection(feature_world_2d_1, cam_pos_1, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
+        cv::Point3f feature_2 = find_intersection(feature_world_2d_2, cam_pos_2, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
+
+        cv::Point3f feature = (feature_1 + feature_2) / 2;
+        features.push_back(feature);
+    }
+
+    return features;
 
 }
