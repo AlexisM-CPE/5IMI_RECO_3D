@@ -37,8 +37,6 @@ int main(int argc, char **argv)
     Mat im_HSV;
     cvtColor(im_BGR, im_HSV, COLOR_BGR2HSV);
 
-
-
     // Edge detection
     Canny(im_gray, canny_edges_gray, 50, 200, 3);
     // Copy edges to the images that will display the results in BGR
@@ -219,7 +217,7 @@ int main(int argc, char **argv)
     Rodrigues(rvecs[0], rot);
     transpose(rot, rot_tr);
 
-    Mat pos_camera(3,1,CV_64F);
+    Mat pos_camera(3, 1, CV_64F);
 
     pos_camera = -rot_tr * tvecs[0];
 
@@ -250,15 +248,13 @@ int main(int argc, char **argv)
     std::cout << "Y : " << pos_camera.at<double>(1, 0) << std::endl;
     std::cout << "Z : " << pos_camera.at<double>(2, 0) << std::endl;
 
-
     // Segmentation
     Mat segmented;
-    Mat M_int_seg = create_M_int(cameraMatrix);
-    Mat M_ext_seg = create_M_ext(rvecs, tvecs);
-    Mat M_trans_seg = compute_transition_matrix(M_int_seg, M_ext_seg);
-    segmentation(im_BGR, M_trans_seg, segmented);
-    imshow("segmentation", segmented);
-    
+    // Mat M_int_seg = create_M_int(cameraMatrix);
+    // Mat M_ext_seg = create_M_ext(rvecs, tvecs);
+    // Mat M_trans_seg = compute_transition_matrix(M_int_seg, M_ext_seg);
+    // segmentation(im_BGR, M_trans_seg, segmented);
+    // imshow("segmentation", segmented);
 
     Mat M_int_2 = create_M_int(cameraMatrix);
     Mat M_ext_2 = create_M_ext(rvecs, tvecs);
@@ -274,17 +270,13 @@ int main(int argc, char **argv)
     std::cout << "camera Y v2 : " << cam_pos_2.y << std::endl;
     std::cout << "camera Z v2 : " << cam_pos_2.z << std::endl;
 
-    std::cout << "Point X v2 : " << pt_15_8_world.x/12.4f << std::endl;
-    std::cout << "Point Y v2 : " << pt_15_8_world.y/12.4f << std::endl;
+    std::cout << "Point X v2 : " << pt_15_8_world.x / 12.4f << std::endl;
+    std::cout << "Point Y v2 : " << pt_15_8_world.y / 12.4f << std::endl;
     std::cout << "Point Z v2 : " << pt_15_8_world.z << std::endl;
-
-
-
-
 
     Mat image_points_output;
     Mat jacobian;
-    double aspectRatio = 16.0f / 9;
+    double aspectRatio = 1.0f;
 
     Point3f p_c = Point3f(pos_camera.at<double>(0, 0), pos_camera.at<double>(1, 0), pos_camera.at<double>(2, 0));
     Point3f d = Point3f(8 * 12.4, 8 * 12.4, 0.0f) - p_c;
@@ -303,6 +295,8 @@ int main(int argc, char **argv)
 
     Mat imageo1, imageo2;
     extract_features(im_gray, im_gray2, &imageo1, &imageo2, 1000);
+    cv::imshow("BF out 1", imageo1);
+    cv::imshow("BF out 1", imageo2);
 
     // //FAST(image, &keypointsD, threshold, true);
     // drawKeypoints(im_gray, feat, imageKey);
@@ -375,7 +369,7 @@ int main(int argc, char **argv)
     im_gray2.copyTo(half);
     imshow( "Result", result );
 */
-/*
+    /*
     // Feature matching
 	BFMatcher BF = BFMatcher(NORM_HAMMING);
 	std::vector<vector<DMatch> > matches;
