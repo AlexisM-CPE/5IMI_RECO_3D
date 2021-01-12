@@ -3,6 +3,7 @@
 #include "Point_Mire.hpp"
 #include "features_extraction.hpp"
 #include <opencv2/calib3d.hpp>
+#include <opencv2/features2d.hpp>
 
 #include <iostream>
 #include <cmath>
@@ -19,6 +20,7 @@ int main(int argc, char **argv)
     Mat im_gray = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_GRAYSCALE);
     Mat im_gray2 = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_GRAYSCALE);
     Mat im_BGR = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_COLOR);
+    Mat im_BGR2 = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_COLOR);
 
     if (!im_gray.data)
     {
@@ -185,7 +187,6 @@ int main(int argc, char **argv)
 
     vector<vector<Point3f>> object_points = extract_object_points(points_grille);
     vector<vector<Point2f>> image_points = extract_image_points(points_grille);
-
     Mat cameraMatrix(3, 3, CV_32FC1);
 
     cameraMatrix.at<float>(0, 2) = im_BGR.rows / 2;
@@ -204,15 +205,58 @@ int main(int argc, char **argv)
     vector<Mat> rvecs;
     vector<Mat> tvecs;
 
+    Mat rot(3, 3, CV_64F);
+    Mat rot_tr(3, 3, CV_64F);
+
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
+
+    Rodrigues(rvecs[0], rot);
+    transpose(rot, rot_tr);
+
+    Mat pos_camera(3, 3, CV_64F);
+
+    pos_camera = -rot_tr * tvecs[0];
+
+    Mat t_obj(3, 3, CV_64F);
+    t_obj = -rot * pos_camera;
+
+    std::cout << "____" << std::endl;
+    std::cout << t_obj.at<double>(0, 0) << std::endl;
+    std::cout << t_obj.at<double>(1, 0) << std::endl;
+    std::cout << t_obj.at<double>(2, 0) << std::endl;
+    std::cout << "____" << std::endl;
+
+    std::cout << tvecs[0].at<double>(0, 0) << std::endl;
+    std::cout << tvecs[0].at<double>(1, 0) << std::endl;
+    std::cout << tvecs[0].at<double>(2, 0) << std::endl;
+    std::cout << "____" << std::endl;
+
+    float phi = -atan(rot_tr.at<double>(1, 2) / rot_tr.at<double>(2, 2));
+    float gamma = -atan(rot_tr.at<double>(0, 1) / rot_tr.at<double>(0, 0));
+    float omega = atan(rot_tr.at<double>(0, 2) / (-rot_tr.at<double>(1, 2) * sin(phi) + rot_tr.at<double>(2, 2) * cos(phi)));
+
+    std::cout << "Phi : " << phi << std::endl;
+    std::cout << "Gamma : " << gamma << std::endl;
+    std::cout << "Omega : " << omega << std::endl;
+    std::cout << "____" << std::endl;
+
+    std::cout << "X : " << pos_camera.at<double>(0, 0) << std::endl;
+    std::cout << "Y : " << pos_camera.at<double>(1, 0) << std::endl;
+    std::cout << "Z : " << pos_camera.at<double>(2, 0) << std::endl;
 
     Mat image_points_output;
     Mat jacobian;
     double aspectRatio = 16 / 9;
 
+    Point3f p_c = Point3f(pos_camera.at<double>(0, 0), pos_camera.at<double>(1, 0), pos_camera.at<double>(2, 0));
+    Point3f d = Point3f(8 * 12.4, 8 * 12.4, 0.0f) - p_c;
+    Point3f p_c2 = p_c + d / 10.0f;
+
+    object_points[0].push_back(p_c2);
+
     projectPoints(object_points.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_points_output, jacobian, aspectRatio);
 
-    for (int i = 0; i < image_points_output.rows; i++)
+    for (int i = 0; i < image_points_output.rows - 1; i++)
     {
         auto p = image_points_output.at<Point2f>(i);
         circle(im_BGR, Point(p.x, p.y), 1, Scalar(0, 255, 0), 2);
@@ -234,6 +278,65 @@ int main(int argc, char **argv)
 
     imshow("keypoints2", imageo2);
 
+    // // Flann needs the descriptors to be of type CV_32F
+    // descriptors_1.convertTo(descriptors_1, CV_8UC1);
+    // descriptors_2.convertTo(descriptors_2, CV_8UC1);
+
+    // std::cout << descriptors_1.rows << ", " << descriptors_1.cols << std::endl;
+    // std::cout << descriptors_2.rows << ", " << descriptors_2.cols << std::endl;
+    // std::cout << "_________________________________" <<std::endl;
+
+    // Mat im_out;
+    // drawKeypoints(im_gray, key_points_1, im_out, Scalar(0,0,255));
+
+    /*
+    FlannBasedMatcher matcher;
+    vector<DMatch> matches;
+    matcher.match( descriptors_1, descriptors_2, matches );
+
+    double max_dist = 0; double min_dist = 100;
+
+
+    //-- Quick calculation of max and min distances between keypoints
+    for( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        double dist = matches[i].distance;
+        if( dist < min_dist ) min_dist = dist;
+        if( dist > max_dist ) max_dist = dist;
+    }
+
+    //-- Use only "good" matches (i.e. whose distance is less than 3*min_dist )
+    vector< DMatch > good_matches;
+
+    for( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        if( matches[i].distance < 3*min_dist )
+        {
+            good_matches.push_back( matches[i]);
+        }
+    }
+    
+    vector< Point2f > obj;
+    vector< Point2f > scene;
+
+
+    for( int i = 0; i < good_matches.size(); i++ )
+    {
+        //-- Get the keypoints from the good matches
+        obj.push_back( key_points_1[ good_matches[i].queryIdx ].pt );
+        scene.push_back( key_points_1[ good_matches[i].trainIdx ].pt );
+    }
+
+
+    // Find the Homography Matrix
+    Mat H = findHomography( obj, scene, RANSAC );
+    // Use the Homography Matrix to warp the images
+    cv::Mat result;
+    warpPerspective(im_gray,result,H,Size(im_gray.cols+im_gray2.cols,im_gray.rows));
+    cv::Mat half(result,cv::Rect(0,0,im_gray2.cols,im_gray2.rows));
+    im_gray2.copyTo(half);
+    imshow( "Result", result );
+*/
     // Wait and Exit
     waitKey(0);
     return 0;
