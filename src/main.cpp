@@ -177,7 +177,7 @@ int main(int argc, char **argv)
             circle(im_hough_segments, Point(x, y), 15 / 2, Scalar(255, 255, 0), 1);
         }
     }
-
+    imshow("Source", im_BGR);
     // Show results
     //imshow("Source", im_BGR);
     //resizeWindow("Source", im_BGR.cols, im_BGR.rows);
@@ -187,6 +187,7 @@ int main(int argc, char **argv)
 
     vector<vector<Point3f>> object_points = extract_object_points(points_grille);
     vector<vector<Point2f>> image_points = extract_image_points(points_grille);
+    std::cout << "size : " << points_grille.size() << std::endl;
     Mat cameraMatrix(3, 3, CV_32FC1);
 
     cameraMatrix.at<float>(0, 2) = im_BGR.rows / 2;
