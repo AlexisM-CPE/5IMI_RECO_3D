@@ -17,10 +17,10 @@ int main(int argc, char **argv)
     Mat canny_edges_gray, im_hough_lines, im_hough_segments;
 
     // Loads an image
-    Mat im_gray = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_GRAYSCALE);
-    Mat im_gray2 = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_GRAYSCALE);
-    Mat im_BGR = imread(samples::findFile("data/saliere/1.jpg"), IMREAD_COLOR);
-    Mat im_BGR2 = imread(samples::findFile("data/saliere/2.jpg"), IMREAD_COLOR);
+    Mat im_gray = imread("data/saliere/1.jpg", IMREAD_GRAYSCALE);
+    Mat im_gray2 = imread("data/saliere/2.jpg", IMREAD_GRAYSCALE);
+    Mat im_BGR = imread("data/saliere/1.jpg", IMREAD_COLOR);
+    Mat im_BGR2 = imread("data/saliere/2.jpg", IMREAD_COLOR);
 
     if (!im_gray.data)
     {
@@ -241,15 +241,13 @@ int main(int argc, char **argv)
     std::cout << "Omega : " << omega << std::endl;
     std::cout << "____" << std::endl;
 
-
     std::cout << "X : " << pos_camera.at<double>(0,0) << std::endl;
     std::cout << "Y : " << pos_camera.at<double>(1,0) << std::endl;
     std::cout << "Z : " << pos_camera.at<double>(2,0) << std::endl;
 
-
     Mat image_points_output;
     Mat jacobian;
-    double aspectRatio = 16 / 9;
+    double aspectRatio = 16.0f / 9;
 
     Point3f p_c = Point3f(pos_camera.at<double>(0,0), pos_camera.at<double>(1,0), pos_camera.at<double>(2,0));
     Point3f d = Point3f(8*12.4, 8*12.4, 0.0f) - p_c;
