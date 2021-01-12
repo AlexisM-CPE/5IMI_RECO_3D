@@ -18,6 +18,7 @@ cv::Mat compute_transition_matrix(cv::Mat M_int, cv::Mat M_ext);
 cv::Point3f get_camera_position(std::vector<cv::Mat> rvecs, std::vector<cv::Mat> tvecs);
 
 cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition);
-cv::Point3f find_feature_3d();
+cv::Point2f find_intersection(cv::Point2f feature_world_2d_1, cv::Point2f cam_proj_1, cv::Point2f feature_world_2d_2, cv::Point2f cam_proj_2);
+cv::Point3f find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos, cv::Mat M_transition);
 
 #endif

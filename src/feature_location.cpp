@@ -107,4 +107,69 @@ cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
     return point_world;
 }
 
-//cv::Point3f find_feature_3d(){}
+cv::Point2f find_intersection(cv::Point2f feature_world_2d_1, cv::Point2f cam_proj_1, cv::Point2f feature_world_2d_2, cv::Point2f cam_proj_2)
+{
+    cv::Point3f intersection;
+    
+    float x1 = feature_world_2d_1.x;
+    float x2 = feature_world_2d_2.x;
+
+    float y1 = feature_world_2d_1.y;
+    float y2 = feature_world_2d_2.y;
+
+    float z1 = feature_world_2d_1.z;
+    float z2 = feature_world_2d_2.z;
+
+    float alpha1 = cam_proj_1.x - feature_world_2d_1.x;
+    float alpha2 = cam_proj_2.x - feature_world_2d_2.x;
+
+    float beta1 = cam_proj_1.y - feature_world_2d_1.y;
+    float beta2 = cam_proj_2.y - feature_world_2d_2.y;
+    
+    float gamma1 = cam_proj_1.z - feature_world_2d_1.z;
+    float gamma2 = cam_proj_2.z - feature_world_2d_2.z;
+
+    cv::Mat M(2,2, CV_64F);
+    cv::Mat T(2,1, CV_64F);
+    cv::Mat X(2,1, CV_64F);
+
+    X.at<double>(0,0) = x2-x1;
+    X.at<double>(1,0) = y2-y1;
+
+    M.at<double>(0,0) = alpha1;
+    M.at<double>(0,1) = - alpha2;
+    M.at<double>(1,0) = bata1;
+    M.at<double>(1,1) = - beta2;
+
+    cv::Mat M_inv = M.inv();
+
+    T = M_inv*X;
+
+    if (z1 + gamma1*T.at<double>(0,0) != z2 + gamma2*T.at<double>(1,0))
+    {
+        std::cout << "No intersection" << std::endl;
+        return intersection;
+    }
+
+    float t = T.at<double>(0,0);
+    intersection.x = x1 + alpha1*t;
+    intersection.y = y1 + beta1*t;
+    intersection.z = z1 + gamma1*t;
+
+    return 
+}
+
+cv::Point3f find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos_1, cv::Point3f cam_pos_2, cv::Mat M_transition)
+{
+    cv::Point2f cam_proj_1(cam_pos_1.x, camp_pos_1.y);
+    cv::Point2f cam_proj_2(cam_pos_2.x, camp_pos_2.y);
+
+    cv::Point3f feature_world_1 = image_to_grid_plan(features_im1, M_transition);
+    cv::Point3f feature_world_2 = image_to_grid_plan(features_im2, M_transition);
+
+    cv::Point2f feature_world_2d_1(feature_world_1.x, feature_world_1.y);
+    cv::Point2f feature_world_2d_2(feature_world_2.x, feature_world_2.y);
+
+    cv::Point2f feature_proj = find_intersection(feature_world_2d_1, cam_proj_1, feature_world_2d_2, cam_proj_2);
+
+}

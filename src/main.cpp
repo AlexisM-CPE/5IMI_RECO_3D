@@ -365,29 +365,29 @@ int main(int argc, char **argv)
     imshow( "Result", result );
 */
 
-    // Feature matching
-	BFMatcher BF = BFMatcher(NORM_HAMMING);
-	std::vector<vector<DMatch> > matches;
-	BF.knnMatch(descriptors_1, descriptors_2, matches, 2);
+    // // Feature matching
+	// BFMatcher BF = BFMatcher(NORM_HAMMING);
+	// std::vector<vector<DMatch> > matches;
+	// BF.knnMatch(descriptors_1, descriptors_2, matches, 2);
 
-	std::vector<DMatch> match1;
-	std::vector<DMatch> match2;
+	// std::vector<DMatch> match1;
+	// std::vector<DMatch> match2;
 
-	for (int i = 0; i < matches.size(); i++)
-	{
-		match1.push_back(matches[i][0]);
-		match2.push_back(matches[i][1]);
-	}
+	// for (int i = 0; i < matches.size(); i++)
+	// {
+	// 	match1.push_back(matches[i][0]);
+	// 	match2.push_back(matches[i][1]);
+	// }
 
-    Mat img_matches1, img_matches2;
-	drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match1, img_matches1);
-	drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match2, img_matches2);
+    // Mat img_matches1, img_matches2;
+	// drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match1, img_matches1);
+	// drawMatches(im_gray, key_points_1, im_gray2, key_points_2, match2, img_matches2);
 
-	imshow("test2", img_matches1);
-	imshow("test4", img_matches2);
+	// imshow("test2", img_matches1);
+	// imshow("test4", img_matches2);
 
 
-    imshow("out", im_out);
+    // imshow("out", im_out);
     // Wait and Exit
     waitKey(0);
     return 0;
