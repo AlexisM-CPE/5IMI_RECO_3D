@@ -1,6 +1,7 @@
 #include "points_detection.hpp"
 #include "grid_creation.hpp"
 #include "Point_Mire.hpp"
+#include "segmentation.hpp"
 #include "features_extraction.hpp"
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
@@ -33,6 +34,10 @@ int main(int argc, char **argv)
     // Convert BGR image to HSV
     Mat im_HSV;
     cvtColor(im_BGR, im_HSV, COLOR_BGR2HSV);
+
+    //Segmentation
+    Mat repere, segmented;
+    segmentation(im_BGR, repere, segmented);
 
     // Edge detection
     Canny(im_gray, canny_edges_gray, 50, 200, 3);
