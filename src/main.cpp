@@ -243,6 +243,7 @@ int main(int argc, char **argv)
     std::cout << "Omega : " << omega << std::endl;
     std::cout << "____" << std::endl;
 
+
     std::cout << "X : " << pos_camera.at<double>(0, 0) << std::endl;
     std::cout << "Y : " << pos_camera.at<double>(1, 0) << std::endl;
     std::cout << "Z : " << pos_camera.at<double>(2, 0) << std::endl;
@@ -273,7 +274,7 @@ int main(int argc, char **argv)
 
     Mat image_points_output;
     Mat jacobian;
-    double aspectRatio = 16.0f / 9;
+    double aspectRatio = 1.0f;
 
     Point3f p_c = Point3f(pos_camera.at<double>(0, 0), pos_camera.at<double>(1, 0), pos_camera.at<double>(2, 0));
     Point3f d = Point3f(8 * 12.4, 8 * 12.4, 0.0f) - p_c;
@@ -292,6 +293,17 @@ int main(int argc, char **argv)
 
     Mat imageo1, imageo2;
     extract_features(im_gray, im_gray2, &imageo1, &imageo2, 1000);
+
+
+
+
+
+
+
+
+
+
+
 
     // //FAST(image, &keypointsD, threshold, true);
     // drawKeypoints(im_gray, feat, imageKey);
