@@ -83,7 +83,7 @@ cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
     cv::Mat M_trans_2d_inv(3,3,CV_64F);
     M_trans_2d_inv = M_trans_2d.inv();
 
-
+/*
     for (int i = 0 ; i < 3 ; i++ )
     {
         for (int j = 0 ;  j < 3 ; j++)
@@ -91,12 +91,12 @@ cv::Point3f image_to_grid_plan(cv::Point2f point_image, cv::Mat M_transition)
             std::cout << M_trans_2d_inv.at<double>(i,j) << "   ";
         }
         std::cout << std::endl;
-    }
+    }*/
 
     mat_world = M_trans_2d_inv * mat_image;
 
     double alpha = mat_world.at<double>(2,0);
-    std::cout << "alpha : " << alpha << std::endl;
+    //std::cout << "alpha : " << alpha << std::endl;
     point_world.x = mat_world.at<double>(0,0) / alpha;
     point_world.y = mat_world.at<double>(1,0) / alpha;
     point_world.z = 0.0f;

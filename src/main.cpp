@@ -37,9 +37,7 @@ int main(int argc, char **argv)
     Mat im_HSV;
     cvtColor(im_BGR, im_HSV, COLOR_BGR2HSV);
 
-    //Segmentation
-    Mat repere, segmented;
-    segmentation(im_BGR, repere, segmented);
+
 
     // Edge detection
     Canny(im_gray, canny_edges_gray, 50, 200, 3);
@@ -253,6 +251,14 @@ int main(int argc, char **argv)
     std::cout << "Z : " << pos_camera.at<double>(2, 0) << std::endl;
 
 
+    // Segmentation
+    Mat segmented;
+    Mat M_int_seg = create_M_int(cameraMatrix);
+    Mat M_ext_seg = create_M_ext(rvecs, tvecs);
+    Mat M_trans_seg = compute_transition_matrix(M_int_seg, M_ext_seg);
+    segmentation(im_BGR, M_trans_seg, segmented);
+    imshow("segmentation", segmented);
+    
 
     Mat M_int_2 = create_M_int(cameraMatrix);
     Mat M_ext_2 = create_M_ext(rvecs, tvecs);
@@ -306,9 +312,9 @@ int main(int argc, char **argv)
     //imageKey = (imageKey - min) * 255 / (max - min);
     //cv::normalize(imageKey, imageKey, 0, 256, CV_MMX);
     //normalize(imageKey, imageKey, 0, 255, NORM_MINMAX, CV_8U);
-    imshow("keypoints", imageo1);
+    //imshow("keypoints", imageo1);
 
-    imshow("keypoints2", imageo2);
+    //imshow("keypoints2", imageo2);
 
     // // Flann needs the descriptors to be of type CV_32F
     // descriptors_1.convertTo(descriptors_1, CV_8UC1);
@@ -369,7 +375,7 @@ int main(int argc, char **argv)
     im_gray2.copyTo(half);
     imshow( "Result", result );
 */
-
+/*
     // Feature matching
 	BFMatcher BF = BFMatcher(NORM_HAMMING);
 	std::vector<vector<DMatch> > matches;
@@ -390,9 +396,9 @@ int main(int argc, char **argv)
 
 	imshow("test2", img_matches1);
 	imshow("test4", img_matches2);
+*/
 
-
-    imshow("out", im_out);
+    //imshow("out", im_out);
     // Wait and Exit
     waitKey(0);
     return 0;
