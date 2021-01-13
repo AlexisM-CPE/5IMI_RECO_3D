@@ -165,6 +165,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
 
     if (name != "None")
         imshow(name, im_BGR);
+        imshow("Hough", im_hough_segments);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
     object_points = extract_object_points(points_grille);

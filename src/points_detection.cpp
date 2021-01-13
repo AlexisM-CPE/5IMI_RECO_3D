@@ -97,7 +97,7 @@ vector<int> kmeans(vector<float> const& angles, int it_max, int k, float min_v, 
         for (unsigned int j = 0 ; j < angles.size() ; j++){
             vector<float> dist_k;
             for (int i = 0 ; i < k ; i++){
-                dist_k.push_back(min(abs(om[i] - angles[j]), float(abs(CV_PI - abs(om[i] - angles[j])))));
+                dist_k.push_back(min(abs(om[i] - angles[j]), float(abs(om[i] - abs(2*CV_PI - 2*angles[j])))));
             }
             float min_e = *min_element(dist_k.begin(), dist_k.end());
             int n_k;
@@ -111,7 +111,7 @@ vector<int> kmeans(vector<float> const& angles, int it_max, int k, float min_v, 
             labels[j] = n_k;
             dist[j] = dist_k[n_k];
 
-            sum_val[n_k] += min(angles[j], float(abs(CV_PI - angles[j])));
+            sum_val[n_k] += min(angles[j], float(abs(2*CV_PI - 2*angles[j])));
             nb_elem[n_k] += 1;
         }
 
