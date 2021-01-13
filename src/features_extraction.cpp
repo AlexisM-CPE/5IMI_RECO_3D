@@ -2,6 +2,7 @@
 #include "features_extraction.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d.hpp"
+#include <iostream>
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, int threshold)
 {
@@ -19,13 +20,21 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
 
     std::vector<cv::DMatch> match1;
     std::vector<cv::DMatch> match2;
+    std::vector<cv::Point2f> matched_points1;
+    std::vector<cv::Point2f> matched_points2;
+    std::vector<cv::Point2f> test1;
 
     for (int i = 0; i < matches.size(); i++)
     {
         match1.push_back(matches[i][0]);
         match2.push_back(matches[i][1]);
+        matched_points1.push_back(keyPoints1[matches[i][0].queryIdx].pt);
     }
 
+    for (auto test : matched_points1)
+    {
+        std::cout << " match out 1 : " << test.x << std::endl;
+    }
     cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match1, *image_out1);
     cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match2, *image_out2);
     //cv::KeyPointsFilter::retainBest(keypointsD, threshold);
