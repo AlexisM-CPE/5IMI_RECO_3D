@@ -45,7 +45,9 @@ int main(int argc, char **argv)
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, M_int_2, M_ext_2, "Calibrage image 2");
 
     Mat imageo1, imageo2;
-    extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, 1000);
+    std::vector<cv::Point2f> matched_points1;
+    std::vector<cv::Point2f> matched_points2;
+    extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 1000);
 
     while (true)
     {

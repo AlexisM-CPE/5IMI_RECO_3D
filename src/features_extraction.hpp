@@ -4,6 +4,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 
-void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, int threshold);
+void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *matched_points1, std::vector<cv::Point2f> *matched_points2, int threshold);
 
 #endif
