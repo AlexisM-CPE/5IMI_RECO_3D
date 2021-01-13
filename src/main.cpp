@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     {
         // Close and quit only when Escape is pressed
         int key = waitKey(0);
-        if (key == 27)
+        if (key == 27 || key == -1)
             break;
     }
     return 0;
