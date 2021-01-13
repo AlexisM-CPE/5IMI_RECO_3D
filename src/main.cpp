@@ -48,10 +48,31 @@ int main(int argc, char **argv)
     segmentation(im_BGR_1, M_trans_seg, segmented);
     imshow("segmentation", segmented);
 
+
     cv::Mat imageo1, imageo2;
     std::vector<cv::Point2f> matched_points1;
     std::vector<cv::Point2f> matched_points2;
-    extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 1000);
+    extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 100);
+
+    cv::Point3f camera_pos_1 = get_camera_position(M_ext_1);
+    cv::Point3f camera_pos_2 = get_camera_position(M_ext_2);
+
+
+    cv::Mat M_transition_1 = compute_transition_matrix(M_int_1, M_ext_1);
+    cv::Mat M_transition_2 = compute_transition_matrix(M_int_2, M_ext_2);
+
+    std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
+    
+
+
+    create_cloud_file(features_3D, "./nuage.xyz");
+    
+    for (auto p : matched_points1)
+    {
+        circle(im_gray_1, p, 15 / 2, cv::Scalar(255, 0, 0), 1);
+    }
+
+    imshow("features", im_gray_1);
 
     while (true)
     {
