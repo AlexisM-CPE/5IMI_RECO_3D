@@ -47,6 +47,8 @@ int main(int argc, char **argv)
     Mat imageo1, imageo2;
     extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, 1000);
 
+
+
     while (true)
     {
         // Close and quit only when Escape is pressed
