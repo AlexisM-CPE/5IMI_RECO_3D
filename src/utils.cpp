@@ -5,7 +5,7 @@
 // using namespace std;
 
 
-int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, std::string name="Image")
+int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, std::string name)
 {
     cv::Mat canny_edges_gray, im_hough_lines, im_hough_segments;
     if (!im_gray.data)
