@@ -2,6 +2,7 @@
 #include "grid_creation.hpp"
 #include "Point_Mire.hpp"
 #include "features_extraction.hpp"
+#include "segmentation.hpp"
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
 
@@ -41,7 +42,13 @@ int main(int argc, char **argv)
     Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, M_int_1, M_ext_1, "Calibrage image 1");
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, M_int_2, M_ext_2, "Calibrage image 2");
 
-    Mat imageo1, imageo2;
+    // Segmentation
+    cv::Mat segmented;
+    cv::Mat M_trans_seg = compute_transition_matrix(M_int_1, M_ext_1);
+    segmentation(im_BGR_1, M_trans_seg, segmented);
+    imshow("segmentation", segmented);
+
+    cv::Mat imageo1, imageo2;
     std::vector<cv::Point2f> matched_points1;
     std::vector<cv::Point2f> matched_points2;
     extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 1000);
