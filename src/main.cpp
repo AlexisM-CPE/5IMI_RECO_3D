@@ -45,11 +45,41 @@ int main(int argc, char **argv)
     std::vector<cv::Point2f> matched_points1;
     std::vector<cv::Point2f> matched_points2;
     extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 1000);
-    TransformType::Pointer transform = TransformType::New();
-    transform = registrate_image("data/origami/1.jpg", "data/origami/2.jpg");
 
-    PointType test = transform_point(convert_CVPoint2ITKPoint(matched_points1[0]), transform);
-    cv::Point2f testcv = convert_ITKPoint2CVPoint(test);
+    cv::Point3f camera_pos_1 = get_camera_position(M_ext_1);
+    cv::Point3f camera_pos_2 = get_camera_position(M_ext_2);
+
+    cv::Mat M_transition_1 = compute_transition_matrix(M_int_1, M_ext_1);
+    cv::Mat M_transition_2 = compute_transition_matrix(M_int_2, M_ext_2);
+
+    std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
+
+    create_cloud_file(features_3D, "./nuage.xyz");
+
+    TransformType::Pointer transform = TransformType::New();
+    transform = registrate_image("data/origami/2.jpg", "data/origami/1.jpg");
+
+    std::vector<cv::Point2f> new_matched_points2;
+    for (auto p : matched_points1)
+    {
+        PointType temp = transform_point(convert_CVPoint2ITKPoint(p), transform);
+        cv::Point2f p_temp = convert_ITKPoint2CVPoint(temp);
+        new_matched_points2.push_back(p_temp);
+        circle(im_BGR_2, p_temp, 2, cv::Scalar(0, 0, 255), -1);
+    }
+
+    for (auto p : matched_points1)
+    {
+        circle(im_BGR_2, p, 2, cv::Scalar(255, 0, 0), -1);
+    }
+    std::cout << "old x : " << matched_points2[0].x << " y : " << matched_points2[0].y << std::endl;
+    std::cout << "new x : " << new_matched_points2[0].x << " y : " << new_matched_points2[0].y << std::endl;
+    imshow("features", im_BGR_2);
+
+    cv::Mat im_out = imread("out/output.jpg", cv::IMREAD_GRAYSCALE);
+
+    cv::Mat diff = im_gray_2 - im_out;
+    imshow("diff", diff);
     while (true)
     {
         // Close and quit only when Escape is pressed

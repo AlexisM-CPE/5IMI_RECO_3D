@@ -10,6 +10,19 @@
 #include "itkRescaleIntensityImageFilter.h"
 #include <itkCenteredTransformInitializer.h>
 
+#include <opencv2/plot.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/core/core.hpp"
+
+cv::Mat display;
+cv::Ptr<cv::plot::Plot2d> plot;
+cv::Mat xData(1, 1500, CV_64FC1); //1 Row, 100 columns, Double
+cv::Mat yData(1, 1500, CV_64FC1);
+
 void CommandIterationUpdate::Execute(itk::Object *caller, const itk::EventObject &event)
 {
     Execute((const itk::Object *)caller, event);
@@ -25,7 +38,8 @@ void CommandIterationUpdate::Execute(const itk::Object *object, const itk::Event
     std::cout << optimizer->GetCurrentIteration() << "   ";
     std::cout << optimizer->GetValue() << "   ";
     std::cout << optimizer->GetCurrentPosition();
-
+    yData.at<double>(optimizer->GetCurrentIteration()) = optimizer->GetValue();
+    xData.at<double>(optimizer->GetCurrentIteration()) = optimizer->GetCurrentIteration();
     // Print the angle for the trace plot
     vnl_matrix<double> p(2, 2);
     p[0][0] = (double)optimizer->GetCurrentPosition()[0];
@@ -82,7 +96,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     registration->SetInitialTransform(transform);
     registration->InPlaceOn();
 
-    double translationScale = 1.0 / 1000.0;
+    double translationScale = 1.0f / 1000.0; //1.0f
 
     using OptimizerScalesType = OptimizerType::ScalesType;
     OptimizerScalesType optimizerScales(transform->GetNumberOfParameters());
@@ -95,11 +109,11 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     optimizer->SetScales(optimizerScales);
 
-    double steplength = 1.0;
-    unsigned int maxNumberOfIterations = 150;
+    double steplength = 0.1f; //1.0f
+    unsigned int maxNumberOfIterations = 1500;
 
     optimizer->SetLearningRate(steplength);
-    optimizer->SetMinimumStepLength(0.0001);
+    optimizer->SetMinimumStepLength(0.000001);
     optimizer->SetNumberOfIterations(maxNumberOfIterations);
 
     CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
@@ -178,6 +192,8 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     FixedImageType::Pointer fixedImage = fixedImageReader->GetOutput();
     resampler->SetSize(fixedImage->GetLargestPossibleRegion().GetSize());
+    resampler->SetReferenceImage(fixedImage);
+    resampler->UseReferenceImageOn();
     resampler->SetOutputOrigin(fixedImage->GetOrigin());
     resampler->SetOutputSpacing(fixedImage->GetSpacing());
     resampler->SetOutputDirection(fixedImage->GetDirection());
@@ -228,11 +244,21 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     resampler->SetTransform(identity);
     writer2->SetFileName("out/output3.jpg");
     writer2->Update();
+
+    plot = cv::plot::Plot2d::create(xData, yData);
+    plot->setPlotSize(1000, 1000);
+    plot->setMaxX(1500);
+    plot->setMinX(000);
+    plot->setMaxY(4000);
+    plot->setMinY(2000);
+    plot->render(display);
+    cv::imshow("Plot", display);
     return transform;
 }
 
 PointType transform_point(PointType point, TransformType::Pointer transform)
 {
-    PointType out_point = transform->TransformPoint(point);
+    TransformType::InverseTransformBasePointer inv_transform = transform->GetInverseTransform();
+    PointType out_point = inv_transform->TransformPoint(point);
     return out_point;
 }
