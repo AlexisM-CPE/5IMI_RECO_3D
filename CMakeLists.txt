@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package( OpenCV REQUIRED )
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
 
 file(
 GLOB_RECURSE
@@ -44,4 +46,4 @@ add_executable(
   ${header_files}
 )
 
-target_link_libraries(projet ${OpenCV_LIBS})
+target_link_libraries(projet ${OpenCV_LIBS} ${ITK_LIBRARIES})

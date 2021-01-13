@@ -4,7 +4,7 @@
 #include "features_extraction.hpp"
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
-
+#include "registration.hpp"
 #include "feature_location.hpp"
 
 #include "utils.hpp"
@@ -41,11 +41,15 @@ int main(int argc, char **argv)
     Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, M_int_1, M_ext_1, "Calibrage image 1");
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, M_int_2, M_ext_2, "Calibrage image 2");
 
-    Mat imageo1, imageo2;
+    cv::Mat imageo1, imageo2;
     std::vector<cv::Point2f> matched_points1;
     std::vector<cv::Point2f> matched_points2;
     extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 1000);
+    TransformType::Pointer transform = TransformType::New();
+    transform = registrate_image("data/origami/1.jpg", "data/origami/2.jpg");
 
+    PointType test = transform_point(convert_CVPoint2ITKPoint(matched_points1[0]), transform);
+    cv::Point2f testcv = convert_ITKPoint2CVPoint(test);
     while (true)
     {
         // Close and quit only when Escape is pressed
