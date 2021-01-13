@@ -36,8 +36,7 @@ void CommandIterationUpdate::Execute(const itk::Object *object, const itk::Event
     vnl_matrix<double> r(2, 2);
     r = svd.U() * vnl_transpose(svd.V());
     double angle = std::asin(r[1][0]);
-    std::cout << " AffineAngle: " << angle * 180.0 / itk::Math::pi
-              << std::endl;
+    std::cout << " AffineAngle: " << angle * 180.0 / itk::Math::pi << std::endl;
 }
 
 TransformType::Pointer registrate_image(std::string filename1, std::string filename2)
@@ -97,7 +96,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     optimizer->SetScales(optimizerScales);
 
     double steplength = 1.0;
-    unsigned int maxNumberOfIterations = 300;
+    unsigned int maxNumberOfIterations = 150;
 
     optimizer->SetLearningRate(steplength);
     optimizer->SetMinimumStepLength(0.0001);
