@@ -1,8 +1,7 @@
 #include "utils.hpp"
 
+#include <fstream>  
 
-// using namespace cv;
-// using namespace std;
 
 
 int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, std::string name)
@@ -231,4 +230,33 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
         cv::imshow(name, im_BGR);
     }
 
+}
+
+
+void create_cloud_file(std::vector<cv::Point3f> points, std::string filename)
+{
+    std::ofstream cloud_file(filename);
+    for (auto point : points)
+    {
+        cloud_file << point.x << " " << point.y << " " << point.z << std::endl;
+    }
+}
+
+std::vector<cv::Point3f> read_cloud_file(std::string filename)
+{
+    std::vector<cv::Point3f> points;
+    std::ifstream cloud_file(filename);
+    std::string line;
+
+
+    while (std::getline(cloud_file, line))
+    {
+        std::istringstream iss(line);
+        float x, y, z;
+        if (!(iss >> x >> y >> z)) { break; } 
+
+        cv::Point3f p(x, y, z);
+        points.push_back(p);
+    }
+    return points;
 }
