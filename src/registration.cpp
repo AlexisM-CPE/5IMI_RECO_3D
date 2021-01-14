@@ -109,11 +109,11 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     optimizer->SetScales(optimizerScales);
 
-    double steplength = 0.1f; //1.0f
+    double steplength = 1.0f; //1.0f
     unsigned int maxNumberOfIterations = 1500;
-
+    optimizer->SetRelaxationFactor(0.6);
     optimizer->SetLearningRate(steplength);
-    optimizer->SetMinimumStepLength(0.000001);
+    optimizer->SetMinimumStepLength(0.00001);
     optimizer->SetNumberOfIterations(maxNumberOfIterations);
 
     CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
@@ -148,7 +148,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     const TransformType::ParametersType finalParameters = registration->GetOutput()->Get()->GetParameters();
 
-    const double finalRotationCenterX = transform->GetCenter()[0];
+    const double finalRotationCenterX = registration->GetOutput()->Get()->GetCenter()[0];
     const double finalRotationCenterY = transform->GetCenter()[1];
     const double finalTranslationX = finalParameters[4];
     const double finalTranslationY = finalParameters[5];
