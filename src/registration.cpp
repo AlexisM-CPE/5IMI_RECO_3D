@@ -126,15 +126,15 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     using ScalesEstimatorType = itk::RegistrationParameterScalesFromPhysicalShift<MetricType>;
     ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
     scalesEstimator->SetMetric(metric);
-    scalesEstimator->SetTransformForward(true);
-    scalesEstimator->SetSmallParameterVariation(1.0);
+    scalesEstimator->SetTransformForward(false);
+    scalesEstimator->SetSmallParameterVariation(1.0f);
 
-    optimizer->SetGradientConvergenceTolerance(0.01f);
-    optimizer->SetLineSearchAccuracy(10.0f);
-    optimizer->SetDefaultStepLength(1.5f);
-    optimizer->TraceOn();
+    optimizer->SetGradientConvergenceTolerance(0.0000001f);
+    optimizer->SetLineSearchAccuracy(1.0f);
+    optimizer->SetDefaultStepLength(2.0f);
+    //optimizer->TraceOn();
     optimizer->SetMaximumNumberOfFunctionEvaluations(maxNumberOfIterations);
-    //optimizer->SetScalesEstimator(scalesEstimator);
+    optimizer->SetScalesEstimator(scalesEstimator);
 
     CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
     optimizer->AddObserver(itk::IterationEvent(), observer);
