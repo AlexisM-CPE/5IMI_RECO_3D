@@ -165,7 +165,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
 
     if (name != "None")
         imshow(name, im_BGR);
-        imshow("Hough", im_hough_segments);
+        imshow("Hough " + name, im_hough_segments);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
     object_points = extract_object_points(points_grille);
@@ -228,9 +228,13 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
             auto p = image_points_output.at<cv::Point2f>(i);
             cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(0, 255, 0), 2);
         }
+        for (int i = 0; i < image_points[0].size(); i++)
+        {
+            auto p = image_points[0][i];
+            cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(0, 0, 255), 2);
+        }
         cv::imshow(name, im_BGR);
     }
-
 }
 
 
