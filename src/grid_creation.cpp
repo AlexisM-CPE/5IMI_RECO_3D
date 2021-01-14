@@ -149,7 +149,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             close_norm.erase(close_norm.begin());
             close_norm.erase(close_norm.begin() + 4, close_norm.end());
             bool verif = true;
-            if (abs(close_norm[0].first - close_norm[3].first) > 15.0f)
+            if (abs(close_norm[0].first - close_norm[3].first) > 25.0f)
                 verif = false;
 
             if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))
@@ -160,6 +160,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                 if (!nghbr.case_color.empty())
                     nghbr.case_color[0] = make_pair(0,0);
                 case_dir case_d;
+
                 for (int k = 0; k < 4; k++)
                 {
                     Point2f dir = points[close_norm[k].second] - p_image.get_coord_pix();
