@@ -73,12 +73,22 @@ vector<Point2f> merge_close_points(const vector<Point2f> &p, float r) {
 
 
 vector<int> kmeans(vector<float> const& angles, int it_max, int k, float min_v, float max_v){
-    vector<float> m(k, 0.0f);
-    vector<float> om(k, 0.0f);
-    // initialization of the means
-    for (int i=0 ; i < k ; i++){
-        m[i] = i*(max_v-min_v)/k + (max_v-min_v)/(2*k);
-    }
+	//float mean_base = mean()
+
+	float dist_to_zero = 0.0f;
+	for (int i = 0 ; i < angles.size() ; i++)
+	{
+		float dist = angles[i];
+		dist_to_zero += dist;
+	}
+
+	dist_to_zero = dist_to_zero/angles.size();
+
+
+	float mean_test_1;
+	float mean_test_2;
+	float mean_1 = fmod(dist_to_zero - CV_PI/4.0f, 2*CV_PI); 
+	float mean_2 = fmod(dist_to_zero + CV_PI/4.0f, 2*CV_PI);
 
     // Initialization of the labels and the distances
     vector<int> labels(angles.size(), 0);
@@ -87,39 +97,53 @@ vector<int> kmeans(vector<float> const& angles, int it_max, int k, float min_v, 
 
     int it = 0;
     while (it < it_max){
-		for (int i = 0 ; i < k ; i++){
-			om[i] = m[i];
-		}
+		mean_test_1 = mean_1;
+		mean_test_2 = mean_2;
 
-        vector<float> sum_val(k, 0.0f);
-        vector<float> nb_elem(k, 0.0f);
+        vector<float> sum_val(2, 0.0f);
+        vector<float> nb_elem(2, 0.0f);
+
         for (unsigned int j = 0 ; j < angles.size() ; j++){
-            vector<float> dist_k;
-            for (int i = 0 ; i < k ; i++){
-                dist_k.push_back(min(abs(om[i] - angles[j]), float(abs(CV_PI - abs(om[i] - angles[j])))));
-            }
-            float min_e = *min_element(dist_k.begin(), dist_k.end());
-            int n_k;
-            for (int l = 0 ; l < k ; l++){
-                if (dist_k[l] == min_e){
-                    n_k = l;
-                    break;
-                }
-            }
+            vector<float> dist_j;
 
-            labels[j] = n_k;
-            dist[j] = dist_k[n_k];
+			float dist_1 = abs(mean_test_1 - angles[j]);
+			float dist_2 = abs(mean_test_2 - angles[j]);
 
-            sum_val[n_k] += min(angles[j], float(abs(CV_PI - angles[j])));
-            nb_elem[n_k] += 1;
+			if (dist_1 > CV_PI)
+				dist_1 = 2*CV_PI - dist_1;
+
+			if (dist_2 > CV_PI)
+				dist_2 = 2*CV_PI - dist_2;
+
+
+
+			if (dist_1 < dist_2)
+			{
+				labels[j] = 0;
+				nb_elem[0] += 1;
+				if (angles[j] > mean_test_1)
+					sum_val[0] += dist_1;
+				else
+					sum_val[0] -= dist_1;
+			}
+			else
+			{
+				labels[j] = 1;
+				nb_elem[1] += 1;
+				if (angles[j] > mean_test_2)
+					sum_val[1] += dist_2;
+				else
+					sum_val[1] -= dist_2;
+			}
+
+
         }
 
         // New means
-        for (int i = 0 ; i < k ; i++){
-            m[i] = sum_val[i]/nb_elem[i];
-        }
+		mean_1 += sum_val[0]/nb_elem[0];
+		mean_2 += sum_val[1]/nb_elem[1];
+    	it++;
 
-    it++;
     }
 
     return labels;
@@ -150,7 +174,14 @@ vector<float> get_angles(vector<Vec4i> linesP){
 		float norm_v = sqrt(pow(line[0], 2) + pow(line[1], 2)) +0.00001f;
 		line = line/norm_v;
 		float cos_a = vhoriz[0] * line[0] + vhoriz[1] * line[1]; //dot(&vhoriz, &line);
+
+		float cross_product_z = vhoriz[1] * line[0] - vhoriz[0] * line[1];
 		float angle = acos(cos_a);//fmod(acos(cos_a), CV_PI); //acos(cos_a); //fmod(acos(cos_a), CV_PI);
+
+		if (cross_product_z < 0 )
+		{
+			angle = 2* CV_PI - angle;
+		}
 		angles.push_back(angle);
 	}
 	return angles;

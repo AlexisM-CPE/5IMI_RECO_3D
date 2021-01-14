@@ -157,7 +157,10 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             if (verif)
             {
                 neighbour nghbr;
+                if (!nghbr.case_color.empty())
+                    nghbr.case_color[0] = make_pair(0,0);
                 case_dir case_d;
+
                 for (int k = 0; k < 4; k++)
                 {
                     Point2f dir = points[close_norm[k].second] - p_image.get_coord_pix();
@@ -271,6 +274,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 
                 if ((case_d.north + case_d.south == 8) && (case_d.east + case_d.west == 8))
                 {
+                    // std::cout << std::endl;
                     // std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
                     // std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
                     if (nghbr.case_color.size() == 2)

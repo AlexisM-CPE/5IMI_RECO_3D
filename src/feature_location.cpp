@@ -177,10 +177,14 @@ std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> featur
         float t = 0;
         cv::Point3f feature_proj = find_intersection(feature_world_2d_1, cam_proj_1, feature_world_2d_2, cam_proj_2, t);
 
+        cv::Point3f feature_1 = feature_proj;
+        cv::Point3f feature_2 = feature_proj;
 
+        feature_1.z = cam_pos_1.z*sqrt(pow(feature_proj.x - feature_world_1.x, 2) + pow(feature_proj.y - feature_world_1.y, 2))/sqrt(pow(cam_pos_1.x - feature_world_1.x, 2) + pow(cam_pos_1.y - feature_world_1.y, 2));
+        feature_2.z = cam_pos_2.z*sqrt(pow(feature_proj.x - feature_world_2.x, 2) + pow(feature_proj.y - feature_world_2.y, 2))/sqrt(pow(cam_pos_2.x - feature_world_2.x, 2) + pow(cam_pos_2.y - feature_world_2.y, 2));
 
-        cv::Point3f feature_1 = feature_world_2d_1 +  (cam_pos_1 - feature_world_2d_1)/norm((cam_pos_1 - feature_world_2d_1))*t; //find_intersection(feature_world_2d_1, cam_pos_1, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
-        cv::Point3f feature_2 = feature_world_2d_2 +  (cam_pos_2 - feature_world_2d_2)/norm((cam_pos_2 - feature_world_2d_2))*t; //find_intersection(feature_world_2d_2, cam_pos_2, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
+        // cv::Point3f feature_1 = feature_world_2d_1 +  (cam_pos_1 - feature_world_2d_1)/norm((cam_pos_1 - feature_world_2d_1))*t; //find_intersection(feature_world_2d_1, cam_pos_1, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
+        // cv::Point3f feature_2 = feature_world_2d_2 +  (cam_pos_2 - feature_world_2d_2)/norm((cam_pos_2 - feature_world_2d_2))*t; //find_intersection(feature_world_2d_2, cam_pos_2, feature_proj, feature_proj + cv::Point3f(0.0f, 0.0f, 1.0f));
 
         cv::Point3f feature = (feature_1 + feature_2) / 2;
 
