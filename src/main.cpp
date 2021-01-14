@@ -14,11 +14,11 @@
 int main(int argc, char **argv)
 {
     // Loads an image
-    cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/origami/1.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_1 = imread("data/saliere/1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/saliere/1.jpg", cv::IMREAD_COLOR);
 
-    cv::Mat im_gray_2 = imread("data/origami/4.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/origami/4.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_2 = imread("data/saliere/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/saliere/2.jpg", cv::IMREAD_COLOR);
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     create_cloud_file(features_3D, "./nuage.xyz");
 
     TransformType::Pointer transform = TransformType::New();
-    transform = registrate_image("data/origami/4.jpg", "data/origami/1.jpg");
+    transform = registrate_image("data/saliere/1.jpg", "data/saliere/2.jpg");
 
     std::vector<cv::Point2f> new_matched_points2;
     for (auto p : matched_points1)
@@ -80,6 +80,9 @@ int main(int argc, char **argv)
 
     cv::Mat diff = im_gray_2 - im_out;
     imshow("diff", diff);
+
+    diff = im_gray_1 - im_out;
+    imshow("diff2", diff);
 
     while (true)
     {

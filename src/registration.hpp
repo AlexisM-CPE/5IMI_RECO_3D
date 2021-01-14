@@ -5,6 +5,7 @@
 #include "itkImage.h"
 #include "itkImageRegistrationMethodv4.h"
 #include "itkRegularStepGradientDescentOptimizerv4.h"
+#include <itkLBFGSOptimizerv4.h>
 #include "opencv2/core/core.hpp"
 
 constexpr unsigned int Dimension = 2;
@@ -23,7 +24,8 @@ protected:
     CommandIterationUpdate() = default;
 
 public:
-    using OptimizerType = itk::RegularStepGradientDescentOptimizerv4<double>;
+    using OptimizerType = itk::LBFGSOptimizerv4;
+
     using OptimizerPointer = const OptimizerType *;
 
     void

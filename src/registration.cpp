@@ -9,7 +9,7 @@
 #include "itkSubtractImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
 #include <itkCenteredTransformInitializer.h>
-
+#include <itkRegistrationParameterScalesFromPhysicalShift.h>
 #include <opencv2/plot.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
@@ -17,6 +17,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/core/core.hpp"
+#include "itkCorrelationImageToImageMetricv4.h"
 
 cv::Mat display;
 cv::Ptr<cv::plot::Plot2d> plot;
@@ -50,7 +51,7 @@ void CommandIterationUpdate::Execute(const itk::Object *object, const itk::Event
     vnl_matrix<double> r(2, 2);
     r = svd.U() * vnl_transpose(svd.V());
     double angle = std::asin(r[1][0]);
-    std::cout << " AffineAngle: " << angle * 180.0 / itk::Math::pi << std::endl;
+    std::cout << " AffineAngle: " << angle * 180.0 / itk::Math::pi << " SCD : " << optimizer->GetStopConditionDescription() << std::endl;
 }
 
 TransformType::Pointer registrate_image(std::string filename1, std::string filename2)
@@ -60,7 +61,8 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     using FixedImageType = itk::Image<PixelType, Dimension>;
     using MovingImageType = itk::Image<PixelType, Dimension>;
 
-    using OptimizerType = itk::RegularStepGradientDescentOptimizerv4<double>;
+    using OptimizerType = itk::LBFGSOptimizerv4; //RegularStepGradientDescentOptimizerv4<double>; //itk::LBFGSOptimizerv4;
+
     using MetricType = itk::MeanSquaresImageToImageMetricv4<FixedImageType, MovingImageType>;
     using RegistrationType = itk::ImageRegistrationMethodv4<FixedImageType, MovingImageType, TransformType>;
 
@@ -86,35 +88,53 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     using TransformInitializerType = itk::CenteredTransformInitializer<TransformType, FixedImageType, MovingImageType>;
 
     TransformInitializerType::Pointer initializer = TransformInitializerType::New();
+    using VectorType = itk::Vector<double, Dimension>;
+    VectorType initTranslation;
+    initTranslation[0] = -20.0f;
+    initTranslation[1] = 1.0f;
 
+    std::cout << "test : " << transform->GetTranslation()[0] << " : " << transform->GetTranslation()[0] << std::endl;
     initializer->SetTransform(transform);
     initializer->SetFixedImage(fixedImageReader->GetOutput());
     initializer->SetMovingImage(movingImageReader->GetOutput());
-    initializer->MomentsOn();
+    //initializer->MomentsOn();
     initializer->InitializeTransform();
-
+    transform->SetTranslation(initTranslation);
     registration->SetInitialTransform(transform);
     registration->InPlaceOn();
 
-    double translationScale = 1.0f / 1000.0; //1.0f
+    double translationScale = 1.0f / 1000.0f; //1.0f/1000
+    unsigned int maxNumberOfIterations = 1500;
+    /*using OptimizerScalesType = OptimizerType::ScalesType;
 
-    using OptimizerScalesType = OptimizerType::ScalesType;
     OptimizerScalesType optimizerScales(transform->GetNumberOfParameters());
-    optimizerScales[0] = 1.0;
-    optimizerScales[1] = 1.0;
-    optimizerScales[2] = 1.0;
-    optimizerScales[3] = 1.0;
+    optimizerScales[0] = 10.0f;
+    optimizerScales[1] = 10.0f;
+    optimizerScales[2] = 10.0f;
+    optimizerScales[3] = 10.0f; //0.1f; // 1.0
     optimizerScales[4] = translationScale;
     optimizerScales[5] = translationScale;
 
     optimizer->SetScales(optimizerScales);
 
-    double steplength = 1.0f; //1.0f
-    unsigned int maxNumberOfIterations = 1500;
-    optimizer->SetRelaxationFactor(0.6);
+    double steplength = 0.5f; //1.0f
+
+    optimizer->SetRelaxationFactor(0.01f); //added
     optimizer->SetLearningRate(steplength);
-    optimizer->SetMinimumStepLength(0.00001);
-    optimizer->SetNumberOfIterations(maxNumberOfIterations);
+    optimizer->SetMinimumStepLength(0.00001); // 0.0001
+    optimizer->SetNumberOfIterations(maxNumberOfIterations);*/
+    using ScalesEstimatorType = itk::RegistrationParameterScalesFromPhysicalShift<MetricType>;
+    ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
+    scalesEstimator->SetMetric(metric);
+    scalesEstimator->SetTransformForward(true);
+    scalesEstimator->SetSmallParameterVariation(1.0);
+
+    optimizer->SetGradientConvergenceTolerance(0.01f);
+    optimizer->SetLineSearchAccuracy(10.0f);
+    optimizer->SetDefaultStepLength(1.5f);
+    optimizer->TraceOn();
+    optimizer->SetMaximumNumberOfFunctionEvaluations(maxNumberOfIterations);
+    //optimizer->SetScalesEstimator(scalesEstimator);
 
     CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
     optimizer->AddObserver(itk::IterationEvent(), observer);
@@ -148,7 +168,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     const TransformType::ParametersType finalParameters = registration->GetOutput()->Get()->GetParameters();
 
-    const double finalRotationCenterX = registration->GetOutput()->Get()->GetCenter()[0];
+    const double finalRotationCenterX = transform->GetCenter()[0];
     const double finalRotationCenterY = transform->GetCenter()[1];
     const double finalTranslationX = finalParameters[4];
     const double finalTranslationY = finalParameters[5];
@@ -197,7 +217,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     resampler->SetOutputOrigin(fixedImage->GetOrigin());
     resampler->SetOutputSpacing(fixedImage->GetSpacing());
     resampler->SetOutputDirection(fixedImage->GetDirection());
-    resampler->SetDefaultPixelValue(100);
+    resampler->SetDefaultPixelValue(1);
 
     using OutputPixelType = unsigned char;
 
@@ -252,7 +272,14 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     plot->setMaxY(4000);
     plot->setMinY(2000);
     plot->render(display);
-    cv::imshow("Plot", display);
+    //cv::imshow("Plot", display);
+
+    using MatrixType = itk::Matrix<double, 2, 2>;
+    MatrixType matrix;
+    matrix = transform->GetMatrix();
+    std::cout << "------------" << std::endl;
+    std::cout << "---Matrix---" << std::endl;
+    std::cout << matrix << std::endl;
     return transform;
 }
 
