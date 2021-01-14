@@ -72,7 +72,6 @@ vector<Point2f> merge_close_points(const vector<Point2f> &p, float r) {
 
 
 
-
 vector<int> kmeans(vector<float> const& angles, int it_max, int k, float min_v, float max_v){
     vector<float> m(k, 0.0f);
     vector<float> om(k, 0.0f);
