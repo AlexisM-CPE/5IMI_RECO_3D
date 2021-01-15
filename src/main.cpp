@@ -105,7 +105,6 @@ int main(int argc, char **argv)
         circle(im_gray_1, p, 2 / 2, cv::Scalar(255, 0, 0), 1);
     }
 
-
     cv::Point3f c1(0.0f, 0.0f, 0.0f);
     cv::Point3f c2(16.0f, 0.0f, 0.0f);
     cv::Point3f c3(0.0f, 16.0f, 0.0f);
@@ -116,7 +115,6 @@ int main(int argc, char **argv)
     coins.push_back(c2);
     coins.push_back(c3);
     coins.push_back(c4);
-
 
     //imshow("features", im_gray_1);
 
