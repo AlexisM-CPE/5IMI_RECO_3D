@@ -64,6 +64,6 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     line(*image_out1, scene_corners[3] + cv::Point2f((float)image_in2.cols, 0),
          scene_corners[0] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
 
-    cv::imshow("1", *image_out1);
+//     cv::imshow("1", *image_out1);
     //cv::KeyPointsFilter::retainBest(keypointsD, threshold);
 }

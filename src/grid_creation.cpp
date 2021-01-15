@@ -149,7 +149,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             close_norm.erase(close_norm.begin());
             close_norm.erase(close_norm.begin() + 4, close_norm.end());
             bool verif = true;
-            if (abs(close_norm[0].first - close_norm[3].first) > 10.0f)
+            if (abs(close_norm[0].first - close_norm[1].first) > 5.0f || abs(close_norm[2].first - close_norm[2].first) > 5.0f)
                 verif = false;
 
             if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))
@@ -194,9 +194,9 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                                 dir_name = find_dir(dir, case_d, loop);
                             }
                         }
-                        else if (p_image.get_color_int() != WHITE)
+                        else if (p_image.get_color_int() != WHITE && p_image.get_color_int() != YELLOW && p_image.get_color_int() != CYAN)
                         {
-                            if (((abs(hsv_color[0] - mean_c[0]) > 1.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.08f)) && (false_find == false))
+                            if (((abs(hsv_color[0] - mean_c[0]) > 5.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.1)) && (false_find == false))
                             {
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
