@@ -90,8 +90,8 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     TransformInitializerType::Pointer initializer = TransformInitializerType::New();
     using VectorType = itk::Vector<double, Dimension>;
     VectorType initTranslation;
-    initTranslation[0] = -20.0f;
-    initTranslation[1] = 1.0f;
+    initTranslation[0] = 0.0f; //-20.0f;
+    initTranslation[1] = 0.0f; //1.0f;
 
     std::cout << "test : " << transform->GetTranslation()[0] << " : " << transform->GetTranslation()[0] << std::endl;
     initializer->SetTransform(transform);
