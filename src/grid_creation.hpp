@@ -20,10 +20,10 @@
 
 struct case_dir
 {
-    int north;
-    int south;
-    int east;
-    int west;
+    int north = 0;
+    int south = 0;
+    int east = 0;
+    int west = 0;
 };
 
 std::vector<Point_Mire *> find_pos(cv::Mat HSV, std::vector<cv::Point2f> points);

@@ -2,6 +2,9 @@
 #include "features_extraction.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d.hpp"
+#include <opencv2/calib3d.hpp>
+#include "opencv2/highgui.hpp"
+
 #include <iostream>
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *matched_points1, std::vector<cv::Point2f> *matched_points2, int threshold)
@@ -29,7 +32,38 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
         matched_points1->push_back(keyPoints1[matches[i][0].queryIdx].pt);
         matched_points2->push_back(keyPoints2[matches[i][1].queryIdx].pt);
     }
-    cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match1, *image_out1);
-    cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match2, *image_out2);
+
+    cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match1, *image_out1, cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    cv::drawMatches(image_in1, keyPoints1, image_in2, keyPoints2, match2, *image_out2, cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+
+    std::vector<cv::Point2f> obj;
+    std::vector<cv::Point2f> scene;
+    for (size_t i = 0; i < match1.size(); i++)
+    {
+        //-- Get the keypoints from the good matches
+        obj.push_back(keyPoints1[match1[i].queryIdx].pt);
+        scene.push_back(keyPoints2[match1[i].trainIdx].pt);
+    }
+    cv::Mat H = cv::findHomography(obj, scene, cv::RANSAC);
+    //-- Get the corners from the image_1 ( the object to be "detected" )
+    std::vector<cv::Point2f> obj_corners(4);
+    obj_corners[0] = cv::Point2f(0, 0);
+    obj_corners[1] = cv::Point2f((float)image_in2.cols, 0);
+    obj_corners[2] = cv::Point2f((float)image_in2.cols, (float)image_in2.rows);
+    obj_corners[3] = cv::Point2f(0, (float)image_in2.rows);
+    std::vector<cv::Point2f> scene_corners(4);
+
+    cv::perspectiveTransform(obj_corners, scene_corners, H);
+    //-- Draw lines between the corners (the mapped object in the scene - image_2 )
+    line(*image_out1, scene_corners[0] + cv::Point2f((float)image_in2.cols, 0),
+         scene_corners[1] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
+    line(*image_out1, scene_corners[1] + cv::Point2f((float)image_in2.cols, 0),
+         scene_corners[2] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
+    line(*image_out1, scene_corners[2] + cv::Point2f((float)image_in2.cols, 0),
+         scene_corners[3] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
+    line(*image_out1, scene_corners[3] + cv::Point2f((float)image_in2.cols, 0),
+         scene_corners[0] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
+
+    cv::imshow("1", *image_out1);
     //cv::KeyPointsFilter::retainBest(keypointsD, threshold);
 }

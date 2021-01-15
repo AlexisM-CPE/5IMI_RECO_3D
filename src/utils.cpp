@@ -1,8 +1,10 @@
 #include "utils.hpp"
 
-#include <fstream>
+#include <fstream>  
 
-int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<cv::Point3f>> &object_points, std::vector<std::vector<cv::Point2f>> &image_points, std::string name)
+
+
+int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, std::string name)
 {
     cv::Mat canny_edges_gray, im_hough_lines, im_hough_segments;
     if (!im_gray.data)
@@ -24,7 +26,7 @@ int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<
     im_hough_segments = im_hough_lines.clone();
 
     // Standard Hough Line Transform (lines)
-    std::vector<cv::Vec2f> lines;                                   // will hold the results of the detection
+    std::vector<cv::Vec2f> lines;                                            // will hold the results of the detection
     HoughLines(canny_edges_gray, lines, 1, CV_PI / 180, 150, 0, 0); // runs the actual detection
 
     // Draw the lines
@@ -42,8 +44,8 @@ int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<
     }
 
     // Probabilistic Line Transform (segments)
-    std::vector<cv::Vec4i> segments;                                     // will hold the results of the detection
-    HoughLinesP(canny_edges_gray, segments, 1, CV_PI / 180, 50, 30, 10); // runs the actual detection
+    std::vector<cv::Vec4i> segments;                                              // will hold the results of the detection
+    HoughLinesP(canny_edges_gray, segments, 1, CV_PI / 180, 30, 30, 10); // runs the actual detection
 
     std::vector<float> angles = get_angles(segments);
     std::vector<int> labels = kmeans(angles);
@@ -126,29 +128,31 @@ int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<
         // Keeping only the points close to a line
         if (*min_element(distances.begin(), distances.end()) <= eps_dist_lines)
         {
-            circle(im_hough_segments, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
-            circle(im_hough_lines, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
-            circle(im_hough_segments, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
+            if(name != "None"){
+                circle(im_hough_segments, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
+                circle(im_hough_lines, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
+                circle(im_hough_segments, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
 
-            circle(im_hough_lines, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
-            int c = find_color(im_HSV, cv::Point(x, y));
-            switch (c)
-            {
-            case NO_COLOR:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 0, 0), 2);
-                break;
-            case MAGENTA:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 0, 255), 2);
-                break;
-            case YELLOW:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 255, 255), 2);
-                break;
-            case CYAN:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 0), 2);
-                break;
-            case WHITE:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 255), 2);
-                break;
+                circle(im_hough_lines, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
+                int c = find_color(im_HSV, cv::Point(x, y));
+                switch (c)
+                {
+                case NO_COLOR:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 0, 0), 2);
+                    break;
+                case MAGENTA:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 0, 255), 2);
+                    break;
+                case YELLOW:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 255, 255), 2);
+                    break;
+                case CYAN:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 0), 2);
+                    break;
+                case WHITE:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 255), 2);
+                    break;
+                }
             }
             intersection_points.push_back(cv::Point2f(x, y));
         }
@@ -162,8 +166,8 @@ int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<
     }
 
     if (name != "None")
-        imshow(name, im_BGR);
-    imshow("hough", im_hough_segments);
+        cv::imshow(name, im_BGR);
+        cv::imshow(name + " Hough", im_hough_segments);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
     object_points = extract_object_points(points_grille);
@@ -172,20 +176,19 @@ int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<
     return 0;
 }
 
-void Calibrate(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<cv::Point3f>> &object_points, std::vector<std::vector<cv::Point2f>> &image_points, cv::Mat &cameraMatrix, cv::Mat &M_int, cv::Mat &M_ext, std::string name)
-{
 
+void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, cv::Mat& cameraMatrix, cv::Mat distCoeffs, cv::Mat& M_int, cv::Mat& M_ext, std::string name)
+{
+    
     float f = 4;
     float s = 0.0014;
-
-    cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+    
+    cameraMatrix = cv::Mat::eye(3,3,CV_64F);
 
     cameraMatrix.at<float>(0, 2) = im_BGR.rows / 2;
     cameraMatrix.at<float>(1, 2) = im_BGR.cols / 2;
     cameraMatrix.at<float>(1, 1) = f / s;
     cameraMatrix.at<float>(0, 0) = f / s;
-
-    cv::Mat distCoeffs;
 
     std::vector<cv::Mat> rvecs;
     std::vector<cv::Mat> tvecs;
@@ -200,16 +203,25 @@ void Calibrate(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<cv::Po
     M_ext = create_M_ext(rvecs, tvecs);
     M_int = create_M_int(cameraMatrix);
 
+    cv::Mat output_image;
+
+    // cv::undistort(im_BGR, output_image, cameraMatrix, distCoeffs);
+
+    //cv::imshow("Undistort" + name, output_image);
+
+    // im_BGR = output_image;
+
     if (name != "None")
     {
         cv::Point3f cam_pos = get_camera_position(M_ext);
+
 
         cv::Mat image_points_output;
         cv::Mat jacobian;
         double aspectRatio = 1.0f;
 
         cv::Point3f p_c = cv::Point3f(cam_pos.x, cam_pos.y, cam_pos.z);
-        cv::Point3f d = cv::Point3f(8 * 12.4, 8 * 12.4, 0.0f) - p_c;
+        cv::Point3f d = cv::Point3f(8 * 12.375, 8 * 12.375, 0.0f) - p_c;
         cv::Point3f p_c2 = p_c + d / 10.0f;
 
         object_points[0].push_back(p_c2);
@@ -221,9 +233,47 @@ void Calibrate(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<cv::Po
             auto p = image_points_output.at<cv::Point2f>(i);
             cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(0, 255, 0), 2);
         }
+        for (int i = 0; i < image_points[0].size(); i++)
+        {
+            auto p = image_points[0][i];
+            cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(0, 0, 255), 2);
+        }
         cv::imshow(name, im_BGR);
+
+
+        cv::Point3f c1(0.0f, 0.0f, 0.0f);
+        cv::Point3f c2(16.0f * 12.375f, 0.0f, 0.0f);
+        cv::Point3f c3(0.0f, 16.0f * 12.375f, 0.0f);
+        cv::Point3f c4(16.0f * 12.375f, 16.0f * 12.375f, 0.0f);
+
+        std::vector<cv::Point3f> coins;
+        coins.push_back(c1);
+        coins.push_back(c2);
+        coins.push_back(c3);
+        coins.push_back(c4);
+
+        std::vector<std::vector<cv::Point3f>> coins_vect;
+        coins_vect.push_back(coins);
+
+        cv::Mat image_coins_output;
+
+        projectPoints(coins_vect.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_coins_output, jacobian, aspectRatio);
+
+        cv::Mat im_coins = im_BGR.clone();
+
+        for (int i = 0; i < image_coins_output.rows; i++)
+        {
+            auto p = image_coins_output.at<cv::Point2f>(i);
+            cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(255, 0, 0), 2);
+        }
+
+        imshow("coins " + name, im_BGR);
+
+
+
     }
 }
+
 
 void create_cloud_file(std::vector<cv::Point3f> points, std::string filename)
 {
@@ -240,30 +290,15 @@ std::vector<cv::Point3f> read_cloud_file(std::string filename)
     std::ifstream cloud_file(filename);
     std::string line;
 
+
     while (std::getline(cloud_file, line))
     {
         std::istringstream iss(line);
         float x, y, z;
-        if (!(iss >> x >> y >> z))
-        {
-            break;
-        }
+        if (!(iss >> x >> y >> z)) { break; } 
 
         cv::Point3f p(x, y, z);
         points.push_back(p);
     }
     return points;
-}
-
-cv::Point2f convert_ITKPoint2CVPoint(PointType point)
-{
-    return cv::Point2f(point[0], point[1]);
-}
-
-PointType convert_CVPoint2ITKPoint(cv::Point2f point)
-{
-    PointType p;
-    p[0] = point.x;
-    p[1] = point.y;
-    return p;
 }
