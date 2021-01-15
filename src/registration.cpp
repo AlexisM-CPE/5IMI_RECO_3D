@@ -61,7 +61,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     using FixedImageType = itk::Image<PixelType, Dimension>;
     using MovingImageType = itk::Image<PixelType, Dimension>;
 
-    using OptimizerType = itk::LBFGSOptimizerv4; //RegularStepGradientDescentOptimizerv4<double>; //itk::LBFGSOptimizerv4;
+    using OptimizerType = itk::RegularStepGradientDescentOptimizerv4<double>; //RegularStepGradientDescentOptimizerv4<double>; //itk::LBFGSOptimizerv4;
 
     using MetricType = itk::MeanSquaresImageToImageMetricv4<FixedImageType, MovingImageType>;
     using RegistrationType = itk::ImageRegistrationMethodv4<FixedImageType, MovingImageType, TransformType>;
@@ -90,8 +90,8 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     TransformInitializerType::Pointer initializer = TransformInitializerType::New();
     using VectorType = itk::Vector<double, Dimension>;
     VectorType initTranslation;
-    initTranslation[0] = 0.0f; //-20.0f;
-    initTranslation[1] = 0.0f; //1.0f;
+    initTranslation[0] = -70.0f; //-20.0f;
+    initTranslation[1] = -00.0f; //1.0f;
 
     std::cout << "test : " << transform->GetTranslation()[0] << " : " << transform->GetTranslation()[0] << std::endl;
     initializer->SetTransform(transform);
@@ -105,7 +105,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     double translationScale = 1.0f / 1000.0f; //1.0f/1000
     unsigned int maxNumberOfIterations = 1500;
-    /*using OptimizerScalesType = OptimizerType::ScalesType;
+    using OptimizerScalesType = OptimizerType::ScalesType;
 
     OptimizerScalesType optimizerScales(transform->GetNumberOfParameters());
     optimizerScales[0] = 10.0f;
@@ -117,13 +117,13 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     optimizer->SetScales(optimizerScales);
 
-    double steplength = 0.5f; //1.0f
+    double steplength = 1.0f; //1.0f
 
     optimizer->SetRelaxationFactor(0.01f); //added
     optimizer->SetLearningRate(steplength);
     optimizer->SetMinimumStepLength(0.00001); // 0.0001
-    optimizer->SetNumberOfIterations(maxNumberOfIterations);*/
-    using ScalesEstimatorType = itk::RegistrationParameterScalesFromPhysicalShift<MetricType>;
+    optimizer->SetNumberOfIterations(maxNumberOfIterations);
+    /*using ScalesEstimatorType = itk::RegistrationParameterScalesFromPhysicalShift<MetricType>;
     ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
     scalesEstimator->SetMetric(metric);
     scalesEstimator->SetTransformForward(false);
@@ -131,10 +131,10 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     optimizer->SetGradientConvergenceTolerance(0.0000001f);
     optimizer->SetLineSearchAccuracy(0.5f);
-    optimizer->SetDefaultStepLength(5.0f);
+    optimizer->SetDefaultStepLength(10.0f);
     //optimizer->TraceOn();
     optimizer->SetMaximumNumberOfFunctionEvaluations(maxNumberOfIterations);
-    optimizer->SetScalesEstimator(scalesEstimator);
+    optimizer->SetScalesEstimator(scalesEstimator);*/
 
     CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
     optimizer->AddObserver(itk::IterationEvent(), observer);

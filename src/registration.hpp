@@ -24,7 +24,7 @@ protected:
     CommandIterationUpdate() = default;
 
 public:
-    using OptimizerType = itk::LBFGSOptimizerv4;
+    using OptimizerType = itk::RegularStepGradientDescentOptimizerv4<double>;
 
     using OptimizerPointer = const OptimizerType *;
 

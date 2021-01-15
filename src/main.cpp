@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     //imshow("features", im_gray_1);
 
     TransformType::Pointer transform = TransformType::New();
-    transform = registrate_image("data/mario/3.jpg", "data/mario/4.jpg");
+    transform = registrate_image("data/mario/18.jpg", "data/mario/19.jpg");
     cv::Mat im_out = imread("out/output.jpg", cv::IMREAD_GRAYSCALE);
 
     cv::Mat diff = im_gray_2 - im_out;
