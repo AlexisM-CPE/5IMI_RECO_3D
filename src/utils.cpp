@@ -164,8 +164,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
     }
 
     if (name != "None")
-        imshow(name, im_BGR);
-        imshow("Hough " + name, im_hough_segments);
+        cv::imshow(name, im_BGR);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
     object_points = extract_object_points(points_grille);
@@ -175,7 +174,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
 }
 
 
-void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, cv::Mat& cameraMatrix, cv::Mat& M_int, cv::Mat& M_ext, std::string name)
+void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Point3f>>& object_points, std::vector<std::vector<cv::Point2f>>& image_points, cv::Mat& cameraMatrix, cv::Mat distCoeffs, cv::Mat& M_int, cv::Mat& M_ext, std::string name)
 {
     
     float f = 4;
@@ -188,12 +187,12 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
     cameraMatrix.at<float>(1, 1) = f / s;
     cameraMatrix.at<float>(0, 0) = f / s;
 
-    cv::Mat distCoeffs;
-
     std::vector<cv::Mat> rvecs;
     std::vector<cv::Mat> tvecs;
 
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
+
+    std::cout << distCoeffs.rows << "     " << distCoeffs.cols << std::endl;
 
     cv::Mat rot(3, 3, CV_64F);
     cv::Mat rot_tr(3, 3, CV_64F);
@@ -203,6 +202,13 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
     M_ext = create_M_ext(rvecs, tvecs);
     M_int = create_M_int(cameraMatrix);
 
+    cv::Mat output_image;
+
+    cv::undistort(im_BGR, output_image, cameraMatrix, distCoeffs);
+
+    //cv::imshow("Undistort" + name, output_image);
+
+    im_BGR = output_image;
 
 
 
@@ -234,6 +240,38 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
             cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(0, 0, 255), 2);
         }
         cv::imshow(name, im_BGR);
+
+
+        cv::Point3f c1(0.0f, 0.0f, 0.0f);
+        cv::Point3f c2(16.0f * 12.4f, 0.0f, 0.0f);
+        cv::Point3f c3(0.0f, 16.0f * 12.4f, 0.0f);
+        cv::Point3f c4(16.0f * 12.4f, 16.0f * 12.4f, 0.0f);
+
+        std::vector<cv::Point3f> coins;
+        coins.push_back(c1);
+        coins.push_back(c2);
+        coins.push_back(c3);
+        coins.push_back(c4);
+
+        std::vector<std::vector<cv::Point3f>> coins_vect;
+        coins_vect.push_back(coins);
+
+        cv::Mat image_coins_output;
+
+        projectPoints(coins_vect.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_coins_output, jacobian, aspectRatio);
+
+        cv::Mat im_coins = im_BGR.clone();
+
+        for (int i = 0; i < image_coins_output.rows; i++)
+        {
+            auto p = image_coins_output.at<cv::Point2f>(i);
+            cv::circle(im_BGR, cv::Point(p.x, p.y), 1, cv::Scalar(255, 0, 0), 2);
+        }
+
+        imshow("coins " + name, im_BGR);
+
+
+
     }
 }
 
