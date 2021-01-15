@@ -149,7 +149,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             close_norm.erase(close_norm.begin());
             close_norm.erase(close_norm.begin() + 4, close_norm.end());
             bool verif = true;
-            if (abs(close_norm[0].first - close_norm[3].first) > 25.0f)
+            if (abs(close_norm[0].first - close_norm[3].first) > 10.0f)
                 verif = false;
 
             if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))

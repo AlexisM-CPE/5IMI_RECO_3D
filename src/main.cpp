@@ -17,12 +17,12 @@ int main(int argc, char **argv)
     // Loads an image
 
     //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/mario/9.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/9.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_1 = imread("data/mario/25.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/25.jpg", cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/mario/10.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/mario/10.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_2 = imread("data/mario/26.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/mario/26.jpg", cv::IMREAD_COLOR);
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
