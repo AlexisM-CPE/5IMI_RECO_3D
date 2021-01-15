@@ -128,29 +128,31 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
         // Keeping only the points close to a line
         if (*min_element(distances.begin(), distances.end()) <= eps_dist_lines)
         {
-            circle(im_hough_segments, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
-            circle(im_hough_lines, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
-            circle(im_hough_segments, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
+            if(name != "None"){
+                circle(im_hough_segments, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
+                circle(im_hough_lines, cv::Point(x, y), 1, cv::Scalar(255, 0, 0), 2);
+                circle(im_hough_segments, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
 
-            circle(im_hough_lines, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
-            int c = find_color(im_HSV, cv::Point(x, y));
-            switch (c)
-            {
-            case NO_COLOR:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 0, 0), 2);
-                break;
-            case MAGENTA:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 0, 255), 2);
-                break;
-            case YELLOW:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 255, 255), 2);
-                break;
-            case CYAN:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 0), 2);
-                break;
-            case WHITE:
-                circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 255), 2);
-                break;
+                circle(im_hough_lines, cv::Point(x, y), 15 / 2, cv::Scalar(255, 0, 0), 1);
+                int c = find_color(im_HSV, cv::Point(x, y));
+                switch (c)
+                {
+                case NO_COLOR:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 0, 0), 2);
+                    break;
+                case MAGENTA:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 0, 255), 2);
+                    break;
+                case YELLOW:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(0, 255, 255), 2);
+                    break;
+                case CYAN:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 0), 2);
+                    break;
+                case WHITE:
+                    circle(im_BGR, cv::Point(x, y), 1, cv::Scalar(255, 255, 255), 2);
+                    break;
+                }
             }
             intersection_points.push_back(cv::Point2f(x, y));
         }
