@@ -194,8 +194,6 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
 
     calibrateCamera(object_points, image_points, im_BGR.size(), cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
 
-    std::cout << distCoeffs.rows << "     " << distCoeffs.cols << std::endl;
-
     cv::Mat rot(3, 3, CV_64F);
     cv::Mat rot_tr(3, 3, CV_64F);
 
@@ -206,11 +204,11 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
 
     cv::Mat output_image;
 
-    cv::undistort(im_BGR, output_image, cameraMatrix, distCoeffs);
+    // cv::undistort(im_BGR, output_image, cameraMatrix, distCoeffs);
 
     //cv::imshow("Undistort" + name, output_image);
 
-    im_BGR = output_image;
+    // im_BGR = output_image;
 
     if (name != "None")
     {
@@ -222,7 +220,7 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
         double aspectRatio = 1.0f;
 
         cv::Point3f p_c = cv::Point3f(cam_pos.x, cam_pos.y, cam_pos.z);
-        cv::Point3f d = cv::Point3f(8 * 12.4, 8 * 12.4, 0.0f) - p_c;
+        cv::Point3f d = cv::Point3f(8 * 12.375, 8 * 12.375, 0.0f) - p_c;
         cv::Point3f p_c2 = p_c + d / 10.0f;
 
         object_points[0].push_back(p_c2);
@@ -243,9 +241,9 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
 
 
         cv::Point3f c1(0.0f, 0.0f, 0.0f);
-        cv::Point3f c2(16.0f * 12.4f, 0.0f, 0.0f);
-        cv::Point3f c3(0.0f, 16.0f * 12.4f, 0.0f);
-        cv::Point3f c4(16.0f * 12.4f, 16.0f * 12.4f, 0.0f);
+        cv::Point3f c2(16.0f * 12.375f, 0.0f, 0.0f);
+        cv::Point3f c3(0.0f, 16.0f * 12.375f, 0.0f);
+        cv::Point3f c4(16.0f * 12.375f, 16.0f * 12.375f, 0.0f);
 
         std::vector<cv::Point3f> coins;
         coins.push_back(c1);
