@@ -96,19 +96,22 @@ bool is_in_img(cv::Point2f p)
 int find_dir(Point2f dir, case_dir &case_d, int loop)
 {
     int dir_name = 0;
-    float cos = dir.y / norm(dir);
-    float sin = dir.x / norm(dir);
-    if (abs(cos) > abs(sin))
+    float n = sqrt(pow(dir.x, 2) + pow(dir.y, 2));
+    float cos = dir.y / n;
+    float sin = dir.x / n;
+    std::cout << " cos : " << cos << " sin : " << sin << " norm : " << n << std::endl;
+    std::cout << " cos*sin : " << cos * cos + sin * sin << std::endl;
+    if (cos > 0)
     {
-        if (cos > 0)
-        {
-            case_d.east = loop + 1;
-            dir_name = EAST;
-        }
-        else
+        if (sin > 0)
         {
             case_d.west = loop + 1;
             dir_name = WEST;
+        }
+        else
+        {
+            case_d.south = loop + 1;
+            dir_name = SOUTH;
         }
     }
     else
@@ -120,8 +123,8 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
         }
         else
         {
-            case_d.south = loop + 1;
-            dir_name = SOUTH;
+            case_d.east = loop + 1;
+            dir_name = EAST;
         }
     }
     return dir_name;
@@ -190,14 +193,17 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         {
                             if ((abs(hsv_color[1] - mean_c[1]) > 0.02f) && (false_find == false))
                             {
+                                std::cout << " white loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
                         }
                         else if (p_image.get_color_int() != WHITE)
                         {
-                            if (((abs(hsv_color[0] - mean_c[0]) > 1.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.08f)) && (false_find == false))
+                            //std::cout << " color test loop " << hsv_color[0] - mean_c[0] << " test 2 :  " << (hsv_color[1] - mean_c[1]) << std::endl;
+                            if (((abs(hsv_color[0] - mean_c[0]) > 5.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.08f)) && (false_find == false))
                             {
+                                std::cout << " color loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
@@ -206,17 +212,20 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         if (color == NO_COLOR)
                         {
                             test_fa += 1;
+                            //std::cout << " no color id " << loop << std::endl;
                         }
                         else if (color == color_tr)
                         {
-                            test_tr += 1;
+                            //test_tr += 1;
                             test_fa = 0;
+                            //std::cout << "color id " << loop << std::endl;
                         }
                         else if (color != c)
                         {
                             test_tr = 0;
                             color_tr = color;
                             test_fa += 1;
+                            //std::cout << "diff color id " << loop << std::endl;
                         }
                         if (test_tr >= 2)
                         {
@@ -248,10 +257,12 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             dir = pc - p_prev;
                         }
                         loop += 1;
+                        //std::cout << " loop " << loop << std::endl;
                     }
-                    //std::cout << p_image.get_coord_pix() << " nb loop : " << loop << " color : " << color_tr << std::endl;
+                    std::cout << p_image.get_coord_pix() << " color init : " << p_image.get_color_int() << " nb loop : " << loop << " color : " << color_tr << std::endl;
                     if (color_tr > NO_COLOR)
                     {
+                        std::cout << " test ----" << std::endl;
                         switch (dir_name)
                         {
                         case NORTH:
@@ -271,12 +282,13 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         }
                     }
                 }
+                std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
 
                 if ((case_d.north + case_d.south == 8) && (case_d.east + case_d.west == 8))
                 {
                     std::cout << std::endl;
                     std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
-                    std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+
                     for (auto t : nghbr.case_color)
                     {
                         std::cout << "color t: " << t.second << std::endl;
