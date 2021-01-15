@@ -1,4 +1,5 @@
 #include "grid_creation.hpp"
+#include <cmath>
 
 using namespace cv;
 using namespace std;
@@ -99,34 +100,34 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
     float n = sqrt(pow(dir.x, 2) + pow(dir.y, 2));
     float cos = dir.y / n;
     float sin = dir.x / n;
+    float angle = acosf(cos);
+    if (-dir.x < 0)
+        angle = -angle;
+    angle = angle * 180 / M_PI;
     std::cout << " cos : " << cos << " sin : " << sin << " norm : " << n << std::endl;
-    std::cout << " cos*sin : " << cos * cos + sin * sin << std::endl;
-    if (cos > 0)
+    std::cout << " angle : " << angle << std::endl;
+    if ((angle > 135) || (angle <= -135))
     {
-        if (sin > 0)
-        {
-            case_d.west = loop + 1;
-            dir_name = WEST;
-        }
-        else
-        {
-            case_d.south = loop + 1;
-            dir_name = SOUTH;
-        }
+        case_d.west = loop + 1;
+        dir_name = WEST;
+    }
+
+    else if (angle >= 45)
+    {
+        case_d.north = loop + 1;
+        dir_name = NORTH;
+    }
+    else if (angle >= -45)
+    {
+        case_d.east = loop + 1;
+        dir_name = EAST;
     }
     else
     {
-        if (sin > 0)
-        {
-            case_d.north = loop + 1;
-            dir_name = NORTH;
-        }
-        else
-        {
-            case_d.east = loop + 1;
-            dir_name = EAST;
-        }
+        case_d.south = loop + 1;
+        dir_name = SOUTH;
     }
+
     return dir_name;
 }
 
@@ -152,7 +153,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             close_norm.erase(close_norm.begin());
             close_norm.erase(close_norm.begin() + 4, close_norm.end());
             bool verif = true;
-            if (abs(close_norm[0].first - close_norm[3].first) > 10.0f)
+            if ((abs(close_norm[0].first - close_norm[1].first) > 5.0f) && (abs(close_norm[2].first - close_norm[3].first) > 5.0f))
                 verif = false;
 
             if (!((find_color(HSV, points[close_norm[0].second]) == c) && (find_color(HSV, points[close_norm[1].second]) == c) && (find_color(HSV, points[close_norm[2].second]) == c) && (find_color(HSV, points[close_norm[3].second]) == c)))
@@ -193,7 +194,6 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         {
                             if ((abs(hsv_color[1] - mean_c[1]) > 0.02f) && (false_find == false))
                             {
-                                std::cout << " white loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
@@ -201,9 +201,8 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         else if (p_image.get_color_int() != WHITE)
                         {
                             //std::cout << " color test loop " << hsv_color[0] - mean_c[0] << " test 2 :  " << (hsv_color[1] - mean_c[1]) << std::endl;
-                            if (((abs(hsv_color[0] - mean_c[0]) > 5.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.08f)) && (false_find == false))
+                            if (((abs(hsv_color[0] - mean_c[0]) > 5.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.1f)) && (false_find == false))
                             {
-                                std::cout << " color loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
@@ -259,10 +258,10 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         loop += 1;
                         //std::cout << " loop " << loop << std::endl;
                     }
-                    std::cout << p_image.get_coord_pix() << " color init : " << p_image.get_color_int() << " nb loop : " << loop << " color : " << color_tr << std::endl;
+                    //std::cout << p_image.get_coord_pix() << " color init : " << p_image.get_color_int() << " nb loop : " << loop << " color : " << color_tr << std::endl;
                     if (color_tr > NO_COLOR)
                     {
-                        std::cout << " test ----" << std::endl;
+                        //std::cout << " test ----" << std::endl;
                         switch (dir_name)
                         {
                         case NORTH:
@@ -291,7 +290,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 
                     for (auto t : nghbr.case_color)
                     {
-                        std::cout << "color t: " << t.second << std::endl;
+                        //std::cout << "color t: " << t.second << std::endl;
                     }
                     if (nghbr.case_color.size() == 2)
                     {
@@ -299,8 +298,8 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         // std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
                         int coord_x = 0;
                         int coord_y = 0;
-                        std::cout << "color 1: " << nghbr.case_color[0].second << " color 2: " << nghbr.case_color[1].second << std::endl;
-                        std::cout << "first 1: " << nghbr.case_color[0].first << " first 2: " << nghbr.case_color[1].first << std::endl;
+                        // std::cout << "color 1: " << nghbr.case_color[0].second << " color 2: " << nghbr.case_color[1].second << std::endl;
+                        // std::cout << "first 1: " << nghbr.case_color[0].first << " first 2: " << nghbr.case_color[1].first << std::endl;
                         switch (c)
                         {
 
