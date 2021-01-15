@@ -97,63 +97,21 @@ int main(int argc, char **argv)
         circle(im_gray_1, p, 15 / 2, cv::Scalar(255, 0, 0), 1);
     }
 
-    // cv::Point3f c1(0.0f, 0.0f, 0.0f);
-    // cv::Point3f c2(16.0f, 0.0f, 0.0f);
-    // cv::Point3f c3(0.0f, 16.0f, 0.0f);
-    // cv::Point3f c4(16.0f, 16.0f, 0.0f);
+    cv::Point3f c1(0.0f, 0.0f, 0.0f);
+    cv::Point3f c2(16.0f, 0.0f, 0.0f);
+    cv::Point3f c3(0.0f, 16.0f, 0.0f);
+    cv::Point3f c4(16.0f, 16.0f, 0.0f);
 
-    // std::vector<cv::Point3f> coins;
-    // coins.push_back(c1);
-    // coins.push_back(c2);
-    // coins.push_back(c3);
-    // coins.push_back(c4);
+    std::vector<cv::Point3f> coins;
+    coins.push_back(c1);
+    coins.push_back(c2);
+    coins.push_back(c3);
+    coins.push_back(c4);
 
-    // std::vector<std::vector<cv::Point3f>> coins_vect;
-    // coins_vect.push_back(coins);
+    std::vector<std::vector<cv::Point3f>> coins_vect;
+    coins_vect.push_back(coins);
 
-    // cv::Mat image_coins_output;
-
-    // // cv::Mat c1(4,1,CV_64F); 
-    // // cv::Mat c2(4,1,CV_64F); 
-    // // cv::Mat c3(4,1,CV_64F); 
-    // // cv::Mat c4(4,1,CV_64F); 
-
-    // // c1.at<double>(0,0) = 0.0f;
-    // // c1.at<double>(1,0) = 0.0f;
-    // // c1.at<double>(2,0) = 0.0f;
-    // // c1.at<double>(3,0) = 1.0f;
-
-    // // c2.at<double>(0,0) = 16.0f*12.4f;
-    // // c2.at<double>(2,0) = 0.0f;
-    // // c2.at<double>(2,0) = 0.0f;
-    // // c2.at<double>(3,0) = 1.0f;
-
-    // // c3.at<double>(0,0) = 0.0f;
-    // // c3.at<double>(1,0) = 16.0f*12.4f;
-    // // c3.at<double>(2,0) = 0.0f;
-    // // c3.at<double>(3,0) = 1.0f;
-
-    // // c4.at<double>(0,0) = 16.0f*12.4f;
-    // // c4.at<double>(1,0) = 16.0f*12.4f;
-    // // c4.at<double>(2,0) = 0.0f;
-    // // c4.at<double>(3,0) = 1.0f;
-
-    // projectPoints(coins_vect.front(), rvecs.front(), tvecs.front(), cameraMatrix, distCoeffs, image_coins_output, jacobian, aspectRatio);
-
-    // cv::Mat m1 = M_transition_1*c1;
-    // cv::Mat m2 = M_transition_1*c2;
-    // cv::Mat m3 = M_transition_1*c3;
-    // cv::Mat m4 = M_transition_1*c4;
-
-    // circle(im_BGR_1, cv::Point(m1.at<double>(0,0)/m1.at<double>(2,0), m1.at<double>(1,0)/m1.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
-    // circle(im_BGR_1, cv::Point(m2.at<double>(0,0)/m2.at<double>(2,0), m2.at<double>(1,0)/m2.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
-    // circle(im_BGR_1, cv::Point(m3.at<double>(0,0)/m3.at<double>(2,0), m3.at<double>(1,0)/m3.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
-    // circle(im_BGR_1, cv::Point(m4.at<double>(0,0)/m4.at<double>(2,0), m4.at<double>(1,0)/m4.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
-
-    // imshow("coins", im_BGR_1);
-
-
-    //imshow("features", im_gray_1);
+    cv::Mat image_coins_output;
 
     while (true)
     {
