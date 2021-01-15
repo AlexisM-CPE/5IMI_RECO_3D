@@ -127,11 +127,11 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
     scalesEstimator->SetMetric(metric);
     scalesEstimator->SetTransformForward(false);
-    scalesEstimator->SetSmallParameterVariation(1.0f);
+    scalesEstimator->SetSmallParameterVariation(0.1f);
 
     optimizer->SetGradientConvergenceTolerance(0.0000001f);
-    optimizer->SetLineSearchAccuracy(1.0f);
-    optimizer->SetDefaultStepLength(2.0f);
+    optimizer->SetLineSearchAccuracy(0.5f);
+    optimizer->SetDefaultStepLength(5.0f);
     //optimizer->TraceOn();
     optimizer->SetMaximumNumberOfFunctionEvaluations(maxNumberOfIterations);
     optimizer->SetScalesEstimator(scalesEstimator);
@@ -143,11 +143,11 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     RegistrationType::ShrinkFactorsArrayType shrinkFactorsPerLevel;
     shrinkFactorsPerLevel.SetSize(1);
-    shrinkFactorsPerLevel[0] = 1;
+    shrinkFactorsPerLevel[0] = 1.2f;
 
     RegistrationType::SmoothingSigmasArrayType smoothingSigmasPerLevel;
     smoothingSigmasPerLevel.SetSize(1);
-    smoothingSigmasPerLevel[0] = 0;
+    smoothingSigmasPerLevel[0] = 2.0f;
 
     registration->SetNumberOfLevels(numberOfLevels);
     registration->SetSmoothingSigmasPerLevel(smoothingSigmasPerLevel);
