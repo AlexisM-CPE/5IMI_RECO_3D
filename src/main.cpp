@@ -16,13 +16,13 @@ int main(int argc, char **argv)
 {
     // Loads an image
 
-    //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/origami/1.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_gray_1 = imread("data/mario/1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_1 = imread("data/mario/1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/1.jpg", cv::IMREAD_COLOR);
 
-    //cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/origami/2.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
@@ -68,8 +68,8 @@ int main(int argc, char **argv)
     cv::Mat M_transition_2 = compute_transition_matrix(M_int_2, M_ext_2);
 
     cv::Mat centre_mire(4,1,CV_64F);
-    centre_mire.at<double>(0,0) = 8*12.4f;
-    centre_mire.at<double>(1,0) = 8*12.4f;
+    centre_mire.at<double>(0,0) = 8*12.375f;
+    centre_mire.at<double>(1,0) = 8*12.375f;
     centre_mire.at<double>(2,0) = 0.0f;
     centre_mire.at<double>(3,0) = 1.0f;
 

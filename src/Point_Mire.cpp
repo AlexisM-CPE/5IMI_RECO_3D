@@ -1,6 +1,6 @@
 #include "Point_Mire.hpp"
 
-#define grid_size 12.4f
+#define grid_size 12.375f
 
 Point_Mire::Point_Mire()
     : index_mire_data(cv::Point2i(0, 0)), coord_pix_data(cv::Point2f(0.0f, 0.0f)), coord_obj_data(cv::Point2f(0.0f, 0.0f)), color_data(0) {}
