@@ -16,13 +16,13 @@ int main(int argc, char **argv)
 {
     // Loads an image
 
-    //cv::Mat im_gray_1 = imread("data/mario/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/mario/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/1.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_1 = imread("data/mario/9.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/9.jpg", cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_2 = imread("data/mario/10.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/mario/10.jpg", cv::IMREAD_COLOR);
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
@@ -32,6 +32,7 @@ int main(int argc, char **argv)
     std::vector<std::vector<cv::Point2f>> image_points_2;
 
     find_points_mire(im_gray_1, im_BGR_1, object_points_1, image_points_1, "Image 1");
+    std::cout << "--------IMAGE 4 --------" << std::endl;
     find_points_mire(im_gray_2, im_BGR_2, object_points_2, image_points_2, "Image 4");
 
     cv::Mat M_int_1(3, 4, CV_64F);
@@ -94,16 +95,16 @@ int main(int argc, char **argv)
     }
 
     imshow("New image", new_image - im_BGR_1);
-    
 
     std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
-    
+
     create_cloud_file(features_3D, "./nuage.xyz");
 
     for (auto p : matched_points1)
     {
         circle(im_gray_1, p, 2 / 2, cv::Scalar(255, 0, 0), 1);
     }
+
 
     cv::Point3f c1(0.0f, 0.0f, 0.0f);
     cv::Point3f c2(16.0f, 0.0f, 0.0f);
@@ -115,6 +116,7 @@ int main(int argc, char **argv)
     coins.push_back(c2);
     coins.push_back(c3);
     coins.push_back(c4);
+
 
     //imshow("features", im_gray_1);
 

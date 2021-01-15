@@ -54,30 +54,30 @@ int find_color(Mat HSV, Point2f p)
     {
         return NO_COLOR;
     }
-    else if (S < 0.15f)
+    else if (S < 0.10f)
     {
-        if (V > 0.7f)
+        if (V > 0.75f)
             return WHITE;
         else
             return NO_COLOR;
     }
     else if (abs(HSV_magenta.at<Vec3f>(0, 0)[0] - H) < 40.0f)
     {
-        if (V > 0.6f)
+        if ((V > 0.7f) && (S > 0.5f))
             return MAGENTA;
         else
             return NO_COLOR;
     }
     else if (abs(HSV_yellow.at<Vec3f>(0, 0)[0] - H) < 30.0f)
     {
-        if (V > 0.6f)
+        if ((V > 0.7f) && (S > 0.5f))
             return YELLOW;
         else
             return NO_COLOR;
     }
     else if (abs(HSV_cyan.at<Vec3f>(0, 0)[0] - H) < 35.0f)
     {
-        if (V > 0.6f)
+        if ((V > 0.7f) && (S > 0.7f))
             return CYAN;
         else
             return NO_COLOR;
@@ -158,7 +158,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             {
                 neighbour nghbr;
                 if (!nghbr.case_color.empty())
-                    nghbr.case_color[0] = make_pair(0,0);
+                    nghbr.case_color[0] = make_pair(0, 0);
                 case_dir case_d;
 
                 for (int k = 0; k < 4; k++)
@@ -196,7 +196,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         }
                         else if (p_image.get_color_int() != WHITE)
                         {
-                            if (((abs(hsv_color[0] - mean_c[0]) > 4.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.2f)) && (false_find == false))
+                            if (((abs(hsv_color[0] - mean_c[0]) > 2.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.08f)) && (false_find == false))
                             {
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
@@ -274,9 +274,13 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 
                 if ((case_d.north + case_d.south == 8) && (case_d.east + case_d.west == 8))
                 {
-                    // std::cout << std::endl;
-                    // std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
-                    // std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+                    std::cout << std::endl;
+                    std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
+                    std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+                    for (auto t : nghbr.case_color)
+                    {
+                        std::cout << "color t: " << t.second << std::endl;
+                    }
                     if (nghbr.case_color.size() == 2)
                     {
                         // std::cout << p_image.get_color_int() << std::endl;
