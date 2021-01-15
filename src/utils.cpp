@@ -212,8 +212,6 @@ void Calibrate(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<cv::Po
 
     im_BGR = output_image;
 
-
-
     if (name != "None")
     {
         cv::Point3f cam_pos = get_camera_position(M_ext);
