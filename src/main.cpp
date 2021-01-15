@@ -17,12 +17,12 @@ int main(int argc, char **argv)
     // Loads an image
 
     //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/origami/1.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_1 = imread("data/mario/9.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/9.jpg", cv::IMREAD_COLOR);
 
-    //cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/origami/2.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_2 = imread("data/mario/10.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/mario/10.jpg", cv::IMREAD_COLOR);
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
@@ -32,6 +32,7 @@ int main(int argc, char **argv)
     std::vector<std::vector<cv::Point2f>> image_points_2;
 
     find_points_mire(im_gray_1, im_BGR_1, object_points_1, image_points_1, "Image 1");
+    std::cout << "--------IMAGE 4 --------" << std::endl;
     find_points_mire(im_gray_2, im_BGR_2, object_points_2, image_points_2, "Image 4");
 
     cv::Mat M_int_1(3, 4, CV_64F);
@@ -67,13 +68,11 @@ int main(int argc, char **argv)
     cv::Mat M_transition_1 = compute_transition_matrix(M_int_1, M_ext_1);
     cv::Mat M_transition_2 = compute_transition_matrix(M_int_2, M_ext_2);
 
-    cv::Mat centre_mire(4,1,CV_64F);
-    centre_mire.at<double>(0,0) = 8*12.4f;
-    centre_mire.at<double>(1,0) = 8*12.4f;
-    centre_mire.at<double>(2,0) = 0.0f;
-    centre_mire.at<double>(3,0) = 1.0f;
-
-    
+    cv::Mat centre_mire(4, 1, CV_64F);
+    centre_mire.at<double>(0, 0) = 8 * 12.4f;
+    centre_mire.at<double>(1, 0) = 8 * 12.4f;
+    centre_mire.at<double>(2, 0) = 0.0f;
+    centre_mire.at<double>(3, 0) = 1.0f;
 
     cv::Mat centre_mire_im_1 = M_transition_1 * centre_mire;
     cv::Mat centre_mire_im_2 = M_transition_2 * centre_mire;
@@ -94,10 +93,9 @@ int main(int argc, char **argv)
     }
 
     imshow("New image", new_image - im_BGR_1);
-    
 
     std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
-    
+
     create_cloud_file(features_3D, "./nuage.xyz");
 
     for (auto p : matched_points1)
