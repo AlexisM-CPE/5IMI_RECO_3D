@@ -16,12 +16,12 @@ int main(int argc, char **argv)
 {
     // Loads an image
 
-    //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("segmentation1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
+    //cv::Mat im_gray_1 = imread("segmentation1.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_BGR_1 = imread("data/origami/1.jpg", cv::IMREAD_COLOR);
 
-    //cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("segmentation2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_2 = imread("data/origami/2.jpg", cv::IMREAD_GRAYSCALE);
+    //cv::Mat im_gray_2 = imread("segmentation2.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_BGR_2 = imread("data/origami/2.jpg", cv::IMREAD_COLOR);
 
 
@@ -163,6 +163,15 @@ int main(int argc, char **argv)
     cv::Mat m2 = M_transition_1*c2;
     cv::Mat m3 = M_transition_1*c3;
     cv::Mat m4 = M_transition_1*c4;
+
+    std::cout << "x1 : " << m1.at<double>(0,0)/m1.at<double>(2,0) << std::endl;
+    std::cout << "y1 : " << m1.at<double>(1,0)/m1.at<double>(2,0) << std::endl;
+    std::cout << "x2 : " << m2.at<double>(0,0)/m2.at<double>(2,0) << std::endl;
+    std::cout << "y2 : " << m2.at<double>(1,0)/m1.at<double>(2,0) << std::endl;
+    std::cout << "x3 : " << m3.at<double>(0,0)/m3.at<double>(2,0) << std::endl;
+    std::cout << "y3 : " << m3.at<double>(1,0)/m3.at<double>(2,0) << std::endl;
+    std::cout << "x4 : " << m4.at<double>(0,0)/m4.at<double>(2,0) << std::endl;
+    std::cout << "y4 : " << m4.at<double>(1,0)/m4.at<double>(2,0) << std::endl;
 
     circle(im_BGR_1, cv::Point(m1.at<double>(0,0)/m1.at<double>(2,0), m1.at<double>(1,0)/m1.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
     circle(im_BGR_1, cv::Point(m2.at<double>(0,0)/m2.at<double>(2,0), m2.at<double>(1,0)/m2.at<double>(2,0)), 1, cv::Scalar(255, 0, 0), 2);
