@@ -104,7 +104,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
     registration->InPlaceOn();
 
     double translationScale = 1.0f / 1000.0f; //1.0f/1000
-    unsigned int maxNumberOfIterations = 1500;
+    unsigned int maxNumberOfIterations = 500;
     using OptimizerScalesType = OptimizerType::ScalesType;
 
     OptimizerScalesType optimizerScales(transform->GetNumberOfParameters());
@@ -121,7 +121,7 @@ TransformType::Pointer registrate_image(std::string filename1, std::string filen
 
     optimizer->SetRelaxationFactor(0.01f); //added
     optimizer->SetLearningRate(steplength);
-    optimizer->SetMinimumStepLength(0.00001); // 0.0001
+    optimizer->SetMinimumStepLength(0.001); // 0.0001
     optimizer->SetNumberOfIterations(maxNumberOfIterations);
     /*using ScalesEstimatorType = itk::RegistrationParameterScalesFromPhysicalShift<MetricType>;
     ScalesEstimatorType::Pointer scalesEstimator = ScalesEstimatorType::New();
