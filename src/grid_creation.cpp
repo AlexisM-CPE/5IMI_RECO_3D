@@ -96,37 +96,39 @@ bool is_in_img(cv::Point2f p)
 int find_dir(Point2f dir, case_dir &case_d, int loop)
 {
     int dir_name = 0;
-    float cos = dir.y / norm(dir);
-    float sin = dir.x / norm(dir);
-    if (abs(cos) > abs(sin))
+    float n = sqrt(pow(dir.x, 2) + pow(dir.y, 2));
+    float cos = dir.y / n;
+    float sin = dir.x / n;
+    float angle = acosf(cos);
+    if (-dir.x < 0)
+        angle = -angle;
+    angle = angle * 180 / M_PI;
+    // std::cout << " cos : " << cos << " sin : " << sin << " norm : " << n << std::endl;
+    // std::cout << " angle : " << angle << std::endl;
+    if ((angle > 135) || (angle <= -135))
     {
-        if (cos > 0)
-        {
-            case_d.east = loop + 1;
-            dir_name = EAST;
-        }
-        else
-        {
-            case_d.west = loop + 1;
-            dir_name = WEST;
-        }
+        case_d.west = loop + 1;
+        dir_name = WEST;
+    }
+
+    else if (angle >= 45)
+    {
+        case_d.north = loop + 1;
+        dir_name = NORTH;
+    }
+    else if (angle >= -45)
+    {
+        case_d.east = loop + 1;
+        dir_name = EAST;
     }
     else
     {
-        if (sin > 0)
-        {
-            case_d.north = loop + 1;
-            dir_name = NORTH;
-        }
-        else
-        {
-            case_d.south = loop + 1;
-            dir_name = SOUTH;
-        }
+        case_d.south = loop + 1;
+        dir_name = SOUTH;
     }
+
     return dir_name;
 }
-
 std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 {
     int b = 0;
@@ -190,14 +192,16 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         {
                             if ((abs(hsv_color[1] - mean_c[1]) > 0.02f) && (false_find == false))
                             {
+                                // std::cout << " white loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
                         }
-                        else if (p_image.get_color_int() != WHITE && p_image.get_color_int() != YELLOW && p_image.get_color_int() != CYAN)
+                        else if (p_image.get_color_int() != WHITE)
                         {
                             if (((abs(hsv_color[0] - mean_c[0]) > 5.0f) || (abs(hsv_color[1] - mean_c[1]) > 0.1)) && (false_find == false))
                             {
+                                // std::cout << " color loop " << loop << std::endl;
                                 false_find = true;
                                 dir_name = find_dir(dir, case_d, loop);
                             }
@@ -206,17 +210,20 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         if (color == NO_COLOR)
                         {
                             test_fa += 1;
+                            //std::cout << " no color id " << loop << std::endl;
                         }
                         else if (color == color_tr)
                         {
-                            test_tr += 1;
+                            //test_tr += 1;
                             test_fa = 0;
+                            //std::cout << "color id " << loop << std::endl;
                         }
                         else if (color != c)
                         {
                             test_tr = 0;
                             color_tr = color;
                             test_fa += 1;
+                            //std::cout << "diff color id " << loop << std::endl;
                         }
                         if (test_tr >= 2)
                         {
@@ -248,10 +255,12 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             dir = pc - p_prev;
                         }
                         loop += 1;
+                        //std::cout << " loop " << loop << std::endl;
                     }
-                    //std::cout << p_image.get_coord_pix() << " nb loop : " << loop << " color : " << color_tr << std::endl;
+                    // std::cout << p_image.get_coord_pix() << " color init : " << p_image.get_color_int() << " nb loop : " << loop << " color : " << color_tr << std::endl;
                     if (color_tr > NO_COLOR)
                     {
+                        // std::cout << " test ----" << std::endl;
                         switch (dir_name)
                         {
                         case NORTH:
@@ -271,15 +280,16 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         }
                     }
                 }
+                // std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
 
                 if ((case_d.north + case_d.south == 8) && (case_d.east + case_d.west == 8))
                 {
-                    std::cout << std::endl;
-                    std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
-                    std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
+                    // std::cout << std::endl;
+                    // std::cout << p_image.get_color_int() << "  " << nghbr.case_color.size() << std::endl;
+
                     for (auto t : nghbr.case_color)
                     {
-                        std::cout << "color t: " << t.second << std::endl;
+                        // std::cout << "color t: " << t.second << std::endl;
                     }
                     if (nghbr.case_color.size() == 2)
                     {
@@ -287,8 +297,8 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                         // std::cout << " north : " << case_d.north << " sud : " << case_d.south << " east : " << case_d.east << " west : " << case_d.west << std::endl;
                         int coord_x = 0;
                         int coord_y = 0;
-                        std::cout << "color 1: " << nghbr.case_color[0].second << " color 2: " << nghbr.case_color[1].second << std::endl;
-                        std::cout << "first 1: " << nghbr.case_color[0].first << " first 2: " << nghbr.case_color[1].first << std::endl;
+                        // std::cout << "color 1: " << nghbr.case_color[0].second << " color 2: " << nghbr.case_color[1].second << std::endl;
+                        // std::cout << "first 1: " << nghbr.case_color[0].first << " first 2: " << nghbr.case_color[1].first << std::endl;
                         switch (c)
                         {
 
@@ -297,7 +307,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 - nghbr.case_color[0].first;
                                 coord_y = 8 - nghbr.case_color[1].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -307,7 +317,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 - nghbr.case_color[1].first;
                                 coord_y = 8 - nghbr.case_color[0].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -319,7 +329,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 + nghbr.case_color[1].first;
                                 coord_y = 8 + nghbr.case_color[0].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -329,7 +339,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 + nghbr.case_color[0].first;
                                 coord_y = 8 + nghbr.case_color[1].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -341,7 +351,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 - nghbr.case_color[1].first;
                                 coord_y = 8 + nghbr.case_color[0].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -351,7 +361,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 - nghbr.case_color[0].first;
                                 coord_y = 8 + nghbr.case_color[1].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -363,7 +373,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 + nghbr.case_color[0].first;
                                 coord_y = 8 - nghbr.case_color[1].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
@@ -373,7 +383,7 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                             {
                                 coord_x = 8 + nghbr.case_color[1].first;
                                 coord_y = 8 - nghbr.case_color[0].first;
-                                std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
+                                // std::cout << p_image.get_coord_pix() << " coord x : " << coord_x << " coord y : " << coord_y << std::endl;
                                 Point_Mire *p_mire = new Point_Mire(cv::Point2i(coord_x, coord_y), p_image.get_coord_pix(), p_image.get_color_int());
                                 p_mire->compute_coords();
                                 vector_mire.push_back(p_mire);
