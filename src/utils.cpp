@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cmath>
 
-#define offset 0
+#define offset 3.5
 
 int find_points_mire(cv::Mat &im_gray, cv::Mat &im_BGR, std::vector<std::vector<cv::Point3f>> &object_points, std::vector<std::vector<cv::Point2f>> &image_points, std::string name)
 {
@@ -314,20 +314,20 @@ bool out_of_rectangle(int i, int j, cv::Mat M_transition)
     c0.at<double>(2, 0) = 0.0f;
     c0.at<double>(3, 0) = 1.0f;
 
-    c1.at<double>(0, 0) = (16.0f + offset) * 12.4f;
-    c1.at<double>(1, 0) = 0.0f + offset * 12.4f;
-    c1.at<double>(2, 0) = 0.0f;
-    c1.at<double>(3, 0) = 1.0f;
+    c3.at<double>(0, 0) = (16.0f - offset) * 12.4f;
+    c3.at<double>(1, 0) = 0.0f + offset * 12.4f;
+    c3.at<double>(2, 0) = 0.0f;
+    c3.at<double>(3, 0) = 1.0f;
 
-    c2.at<double>(0, 0) = 0.0f + offset * 12.4f;
-    c2.at<double>(1, 0) = (16.0f + offset) * 12.4f;
+    c2.at<double>(0, 0) = (16.0f - offset) * 12.4f;
+    c2.at<double>(1, 0) = (16.0f - offset) * 12.4f;
     c2.at<double>(2, 0) = 0.0f;
     c2.at<double>(3, 0) = 1.0f;
 
-    c3.at<double>(0, 0) = (16.0f + offset) * 12.4f;
-    c3.at<double>(1, 0) = (16.0f + offset) * 12.4f;
-    c3.at<double>(2, 0) = 0.0f;
-    c3.at<double>(3, 0) = 1.0f;
+    c1.at<double>(0, 0) = 0.0f + offset * 12.4f;
+    c1.at<double>(1, 0) = (16.0f - offset) * 12.4f;
+    c1.at<double>(2, 0) = 0.0f;
+    c1.at<double>(3, 0) = 1.0f;
 
     cv::Mat p0 = M_transition * c0;
     cv::Mat p1 = M_transition * c1;
@@ -339,12 +339,12 @@ bool out_of_rectangle(int i, int j, cv::Mat M_transition)
     cv::Point2f t2(p2.at<double>(0, 0) / p2.at<double>(2, 0), p2.at<double>(1, 0) / p2.at<double>(2, 0));
     cv::Point2f t3(p3.at<double>(0, 0) / p3.at<double>(2, 0), p3.at<double>(1, 0) / p3.at<double>(2, 0));
 
-    cv::Point2f p(i, j);
+    cv::Point2f p(j, i);
 
-    float a1 = acos(((p - t0) / norm(p - t0)).dot((p - t1) / norm(p - t1)));
-    float a2 = acos(((p - t1) / norm(p - t1)).dot((p - t2) / norm(p - t2)));
-    float a3 = acos(((p - t2) / norm(p - t2)).dot((p - t3) / norm(p - t3)));
-    float a4 = acos(((p - t3) / norm(p - t3)).dot((p - t0) / norm(p - t0)));
+    float a1 = acos(((t0 - p) / norm(t0 - p)).dot((t1 - p) / norm(t1 - p)));
+    float a2 = acos(((t1 - p) / norm(t1 - p)).dot((t2 - p) / norm(t2 - p)));
+    float a3 = acos(((t2 - p) / norm(t2 - p)).dot((t3 - p) / norm(t3 - p)));
+    float a4 = acos(((t3 - p) / norm(t3 - p)).dot((t0 - p) / norm(t0 - p)));
 
     float eps = M_PI / 24;
 

@@ -12,6 +12,46 @@
 #include <iostream>
 #include <cmath>
 
+std::string type2str(int type)
+{
+    std::string r;
+
+    uchar depth = type & CV_MAT_DEPTH_MASK;
+    uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+    switch (depth)
+    {
+    case CV_8U:
+        r = "8U";
+        break;
+    case CV_8S:
+        r = "8S";
+        break;
+    case CV_16U:
+        r = "16U";
+        break;
+    case CV_16S:
+        r = "16S";
+        break;
+    case CV_32S:
+        r = "32S";
+        break;
+    case CV_32F:
+        r = "32F";
+        break;
+    case CV_64F:
+        r = "64F";
+        break;
+    default:
+        r = "User";
+        break;
+    }
+
+    r += "C";
+    r += (chans + '0');
+
+    return r;
+}
 int main(int argc, char **argv)
 {
     // Loads an image
@@ -141,9 +181,12 @@ int main(int argc, char **argv)
     cv::Mat im_diff = abs(im_BGR_2 - new_image);
     cv::Mat im_diff_gray;
     cv::cvtColor(im_diff, im_diff_gray, cv::COLOR_BGR2GRAY);
+
     // cv::Mat im_seg(im_diff.rows, im_diff.cols, CV_32FC3);
     cv::Mat im_seg(846, 1504, CV_32FC3); //
-    im_seg = new_image.clone();
+    std::cout << "type bgr : " << type2str(im_BGR_2_clone.type()) << std::endl;
+    im_BGR_2_clone.convertTo(im_BGR_2_clone, CV_32FC3, 1.0 / 255.0);
+    im_seg = im_BGR_2_clone.clone();
 
     cv::Mat zeros = cv::Mat::zeros(846, 1504, CV_32FC3);
 
@@ -151,12 +194,12 @@ int main(int argc, char **argv)
 
     cv::Mat abc = im_diff - im_seg;
 
-    float eps_diff_0 = 30.0f;
-    float eps_diff_1 = 0.2f;
-    float eps_diff_2 = 0.44f;
+    float eps_diff_0 = 0.10f;
+    float eps_diff_1 = 0.1f;
+    float eps_diff_2 = 0.1f;
 
-    cvtColor(im_BGR_2_clone, im_BGR_2_clone, cv::COLOR_BGR2HSV);
-    cvtColor(new_image, new_image, cv::COLOR_BGR2HSV);
+    //cvtColor(im_BGR_2_clone, im_BGR_2_clone, cv::COLOR_BGR2HSV);
+    //cvtColor(new_image, new_image, cv::COLOR_BGR2HSV);
 
     std::cout << new_image.rows << "  " << new_image.cols << std::endl;
     std::cout << im_BGR_2_clone.rows << "  " << im_BGR_2_clone.cols << std::endl;
@@ -166,7 +209,7 @@ int main(int argc, char **argv)
         for (int j = 0; j < im_diff.cols; ++j)
         {
 
-            if (!((abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[0] - new_image.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[1] - new_image.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[2] - new_image.at<cv::Vec3f>(i, j)[2]) < eps_diff_2))) // || out_of_rectangle(i, j, M_transition_2))
+            if (((abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[0] - new_image.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[1] - new_image.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[2] - new_image.at<cv::Vec3f>(i, j)[2]) < eps_diff_2)) || out_of_rectangle(i, j, M_transition_2))
             {
                 //std::cout << im_seg.at<cv::Vec3f>(i, j).type() << std::endl;
                 im_seg.at<cv::Vec3f>(i, j) = zeros.at<cv::Vec3f>(i, j); //cv::Vec3f(0, 0, 0);
@@ -174,14 +217,37 @@ int main(int argc, char **argv)
             }
             else
             {
-                im_seg.at<cv::Vec3f>(i, j) = im_BGR_2.at<cv::Vec3f>(i, j);
+                //im_seg.at<cv::Vec3f>(i, j) = im_BGR_2.at<cv::Vec3f>(i, j);
             }
-            std::cout << i << " " << j << std::endl;
+            //std::cout << i << " " << j << std::endl;
         }
     }
+
+    cv::Mat im_segmentee = im_seg.clone();
+
+    for (unsigned int i = 10; i < im_diff.rows - 10; ++i)
+    {
+        for (unsigned int j = 10; j < im_diff.cols - 10; ++j)
+        {
+            int count = 0;
+            for (int k = -10; k <= 10; k++)
+            {
+                for (int l = -10; l <= 10; l++)
+                {
+                    if (norm(im_seg.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
+                        count += 1;
+                }
+            }
+            if (count > 21 * 21 * 3 / 8)
+            {
+                im_segmentee.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+            }
+        }
+    }
+
     imshow("Gray ", im_diff_gray);
-    imshow("New diff ", im_seg);
-    imshow("diff ", im_diff);
+    imshow("New diff ", im_segmentee);
+    imshow("diff ", im_BGR_2_clone);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
