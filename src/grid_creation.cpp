@@ -11,26 +11,32 @@ struct neighbour
 
 int find_color(Mat HSV, Point2f p)
 {
+    // --- Creation of the Magenta ---
     Mat magenta(1, 1, CV_32FC3);
     Mat HSV_magenta;
     magenta = Scalar(1.0f, 0, 1.0f);
     cvtColor(magenta, HSV_magenta, COLOR_BGR2HSV);
+    // -------------------------------
 
+    // --- Creation of the Yellow ---
     Mat yellow(1, 1, CV_32FC3);
     Mat HSV_yellow;
     yellow = Scalar(0.0f, 1.0f, 1.0f);
     cvtColor(yellow, HSV_yellow, COLOR_BGR2HSV);
+    // -------------------------------
 
+    // --- Creation of the Cyan ---
     Mat cyan(1, 1, CV_32FC3);
     Mat HSV_cyan;
     cyan = Scalar(1.0f, 1.0f, 0.0f);
     cvtColor(cyan, HSV_cyan, COLOR_BGR2HSV);
-    //Vec3f hsv_color = HSV.at<Vec3f>(p);
+    // -------------------------------
 
     int i = 0;
     float H_tot = 0.0f;
     float S_tot = 0.0f;
     float V_tot = 0.0f;
+
     for (float j = -10; j < 10; j++)
     {
         for (float k = -10; k < 10; k++)
@@ -363,5 +369,5 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
             }
         }
     }
-    return vector_mire; // Retrun the vector
+    return vector_mire; // Return the vector
 }
