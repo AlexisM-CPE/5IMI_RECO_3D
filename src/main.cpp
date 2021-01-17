@@ -28,6 +28,8 @@ int main(int argc, char **argv)
     cv::Mat im_BGR_features_2 = im_BGR_2.clone();
     cv::Mat im_features = im_BGR_2.clone();
 
+    cv::Mat im_BGR_2_clone = im_BGR_2.clone();
+
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
     std::vector<std::vector<cv::Point2f>> image_points_1;
@@ -141,31 +143,40 @@ int main(int argc, char **argv)
     cv::cvtColor(im_diff, im_diff_gray, cv::COLOR_BGR2GRAY);
     // cv::Mat im_seg(im_diff.rows, im_diff.cols, CV_32FC3);
     cv::Mat im_seg(846, 1504, CV_32FC3); //
-    im_seg = im_diff.clone();
+    im_seg = new_image.clone();
 
     cv::Mat zeros = cv::Mat::zeros(846, 1504, CV_32FC3);
 
-    std::cout << "Type : " << zeros.type() << std::endl;
+    std::cout << "Type : " << im_seg.type() << std::endl;
 
     cv::Mat abc = im_diff - im_seg;
 
-    std::cout << "OpenCV version : " << CV_VERSION << std::endl;
+    float eps_diff_0 = 30.0f;
+    float eps_diff_1 = 0.2f;
+    float eps_diff_2 = 0.44f;
 
-    float eps_diff = 10.0f;
+    cvtColor(im_BGR_2_clone, im_BGR_2_clone, cv::COLOR_BGR2HSV);
+    cvtColor(new_image, new_image, cv::COLOR_BGR2HSV);
+
+    std::cout << new_image.rows << "  " << new_image.cols << std::endl;
+    std::cout << im_BGR_2_clone.rows << "  " << im_BGR_2_clone.cols << std::endl;
+
     for (int i = 0; i < im_diff.rows; ++i)
     {
         for (int j = 0; j < im_diff.cols; ++j)
         {
 
-            if (im_diff_gray.at<double>(i, j) < eps_diff) // || out_of_rectangle(i, j, M_transition_2))
+            if (!((abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[0] - new_image.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[1] - new_image.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[2] - new_image.at<cv::Vec3f>(i, j)[2]) < eps_diff_2))) // || out_of_rectangle(i, j, M_transition_2))
             {
                 //std::cout << im_seg.at<cv::Vec3f>(i, j).type() << std::endl;
                 im_seg.at<cv::Vec3f>(i, j) = zeros.at<cv::Vec3f>(i, j); //cv::Vec3f(0, 0, 0);
+                // std::cout << im_diff_gray.at<float>(i, j) << std::endl;
             }
             else
             {
-                //im_seg.at<cv::Vec3f>(i, j) = im_diff.at<cv::Vec3f>(i, j);
+                im_seg.at<cv::Vec3f>(i, j) = im_BGR_2.at<cv::Vec3f>(i, j);
             }
+            std::cout << i << " " << j << std::endl;
         }
     }
     imshow("Gray ", im_diff_gray);
