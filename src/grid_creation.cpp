@@ -110,8 +110,8 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
     if (-dir.x < 0)
         angle = -angle;
     angle = angle * 180 / M_PI;
-    std::cout << " cos : " << cos << " sin : " << sin << " norm : " << n << std::endl;
-    std::cout << " angle : " << angle << std::endl;
+    // std::cout << " cos : " << cos << " sin : " << sin << " norm : " << n << std::endl;
+    // std::cout << " angle : " << angle << std::endl;
     if ((angle > 135) || (angle <= -135))
     {
         case_d.west = loop + 1;
@@ -136,7 +136,6 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
 
     return dir_name;
 }
-
 std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 {
     std::vector<Point_Mire *> vector_mire;

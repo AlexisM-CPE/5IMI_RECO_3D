@@ -92,7 +92,7 @@ int main(int argc, char **argv)
         }
     }
 
-    imshow("New image", new_image - im_BGR_1);
+    // imshow("New image", new_image - im_BGR_1);
 
     std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
 
