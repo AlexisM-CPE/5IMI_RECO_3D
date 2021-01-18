@@ -36,7 +36,9 @@ int find_color(Mat HSV, Point2f p)
     float H_tot = 0.0f;
     float S_tot = 0.0f;
     float V_tot = 0.0f;
-
+    float H = 0;
+    float S = 0;
+    float V = 0;
     for (float j = -10; j < 10; j++)
     {
         for (float k = -10; k < 10; k++)
@@ -54,9 +56,9 @@ int find_color(Mat HSV, Point2f p)
             }
         }
     }
-    float H = H_tot / i;
-    float S = S_tot / i;
-    float V = V_tot / i;
+    H = H_tot / i;
+    S = S_tot / i;
+    V = V_tot / i;
     if (i < 150)
     {
         return NO_COLOR;
@@ -136,6 +138,7 @@ int find_dir(Point2f dir, case_dir &case_d, int loop)
 
     return dir_name;
 }
+
 std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
 {
     std::vector<Point_Mire *> vector_mire;
@@ -193,15 +196,16 @@ std::vector<Point_Mire *> find_pos(Mat HSV, vector<Point2f> points)
                     vector<pair<float, int>> close_point;
                     vector<Point_Image> points_in_lines;
                     points_in_lines.push_back(p_image);
-
+                    vector<float> hsv_color;
+                    vector<float> mean_c;
                     while (stop == false)
                     {
-                        vector<float> mean_c = mean_color(points_in_lines);            // Get mean color of the current line
+                        mean_c = mean_color(points_in_lines);                          // Get mean color of the current line
                         points_in_lines.push_back(Point_Image(pc));                    // Add the current point in the line
                         int idx_last_element = points_in_lines.size() - 1;             // Update last element index
                         points_in_lines[idx_last_element].find_color_Point_Image(HSV); // Calculate color and update HSV for the current point
                         // Get HSV vector
-                        vector<float> hsv_color = vector<float>{points_in_lines[idx_last_element].H(), points_in_lines[idx_last_element].S(), points_in_lines[idx_last_element].V()};
+                        hsv_color = vector<float>{points_in_lines[idx_last_element].H(), points_in_lines[idx_last_element].S(), points_in_lines[idx_last_element].V()};
                         int color = points_in_lines[idx_last_element].get_color_int(); // Get color
 
                         // --- Verification if the current point color's is near the color of all the previous points in the line ---

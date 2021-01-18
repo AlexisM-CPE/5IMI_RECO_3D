@@ -191,15 +191,15 @@ int main(int argc, char **argv)
                 im_segmentee_diff_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
         }
-        std::cout << i << std::endl;
     }
 
+    std::cout << "hello" << std::endl;
     cv::Mat im_segmentee_1 = im_segmentee_diff_1.clone();
     cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
 
-    for (unsigned int i = 10; i < im_BGR_mire.rows - 10; ++i)
+    for (unsigned int i = 10; i < (unsigned int)im_BGR_mire.rows - 10; ++i)
     {
-        for (unsigned int j = 10; j < im_BGR_mire.cols - 10; ++j)
+        for (unsigned int j = 10; j < (unsigned int)im_BGR_mire.cols - 10; ++j)
         {
             int count_1 = 0;
             int count_2 = 0;
@@ -229,15 +229,15 @@ int main(int argc, char **argv)
     im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
-    imshow("Image 1 segmentée", im_segmentee_1);
-    imshow("Image 2 segmentée", im_segmentee_2);
+    imshow("Image 1 segmentï¿½e", im_segmentee_1);
+    imshow("Image 2 segmentï¿½e", im_segmentee_2);
 
     extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
     std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
-    for (int i = 0; i < matched_points1.size(); i++)
+    for (unsigned int i = 0; i < (unsigned int)matched_points1.size(); i++)
     {
         circle(im_gray_2, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
         circle(im_gray_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
     imshow("Features image 2", im_gray_2);
 
     float eps = 100.0f;
-    for (int i = 0; i < matched_points1.size(); i++)
+    for (unsigned int i = 0; i < (unsigned int)matched_points1.size(); i++)
     {
         cv::Mat p(3, 1, CV_64F);
         p.at<double>(0, 0) = matched_points1[i].x;
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 
     std::cout << matched_transformed_1.size() << std::endl;
 
-    for (int i = 0; i < matched_transformed_1.size(); i++)
+    for (unsigned int i = 0; i < (unsigned int)matched_transformed_1.size(); i++)
     {
         circle(im_features, matched_transformed_1[i], 1, cv::Scalar(0, 255, 0), 2);
         circle(im_features, matched_transformed_2[i], 1, cv::Scalar(0, 0, 255), 2);
