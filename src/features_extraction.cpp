@@ -11,9 +11,15 @@
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *matched_points1, std::vector<cv::Point2f> *matched_points2, int threshold)
 {
     //Feature detection
+    // std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
+    // cv::Mat descriptors1, descriptors2;
+    // cv::Ptr<cv::ORB> detector = cv::ORB::create(threshold, 1.2, 2, 31, 0, 4, cv::ORB::HARRIS_SCORE, 31);
+    // detector->detectAndCompute(image_in1, cv::Mat(), keyPoints1, descriptors1);
+    // detector->detectAndCompute(image_in2, cv::Mat(), keyPoints2, descriptors2);
+
     std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     cv::Mat descriptors1, descriptors2;
-    cv::Ptr<cv::ORB> detector = cv::ORB::create(threshold, 1.2, 2, 31, 0, 4, cv::ORB::HARRIS_SCORE, 31);
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, false, false);
     detector->detectAndCompute(image_in1, cv::Mat(), keyPoints1, descriptors1);
     detector->detectAndCompute(image_in2, cv::Mat(), keyPoints2, descriptors2);
 
