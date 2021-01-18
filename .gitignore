@@ -73,3 +73,11 @@ data/BrainProtonDensitySliceShifted13x17y.png
 data/output.jpg
 data/segmentation1.jpg
 data/segmentation2.jpg
+build/CMakeFiles/FindOpenMP/OpenMPTryFlag.c
+build/CMakeFiles/FindOpenMP/OpenMPTryFlag.cpp
+build/CMakeFiles/projet.dir/src/Point_Image.cpp.o
+build/CMakeFiles/projet.dir/src/Point_Mire.cpp.o
+build/CMakeFiles/FindOpenMP/ompver_CXX.bin
+build/CMakeFiles/FindOpenMP/ompver_C.bin
+build/CMakeFiles/FindOpenMP/OpenMPCheckVersion.c
+build/CMakeFiles/FindOpenMP/OpenMPCheckVersion.cpp

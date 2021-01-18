@@ -19,7 +19,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
 
     std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     cv::Mat descriptors1, descriptors2;
-    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, false, false);
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, true, false);
     detector->detectAndCompute(image_in1, cv::Mat(), keyPoints1, descriptors1);
     detector->detectAndCompute(image_in2, cv::Mat(), keyPoints2, descriptors2);
 
