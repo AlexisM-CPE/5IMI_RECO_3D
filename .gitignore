@@ -67,6 +67,7 @@ build/ITKFactoryRegistration/itkImageIOFactoryRegisterManager.h
 build/ITKFactoryRegistration/itkMeshIOFactoryRegisterManager.h
 build/ITKFactoryRegistration/itkTransformIOFactoryRegisterManager.h
 nuage.xyz
+*.xyz
 data/BrainProtonDensitySliceBorder20.png
 data/BrainProtonDensitySliceShifted13x17y.png
 data/output.jpg

@@ -45,7 +45,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
 
     // Probabilistic Line Transform (segments)
     std::vector<cv::Vec4i> segments;                                              // will hold the results of the detection
-    HoughLinesP(canny_edges_gray, segments, 1, CV_PI / 180, 50, 30, 10); // runs the actual detection
+    HoughLinesP(canny_edges_gray, segments, 1, CV_PI / 180, 30, 30, 10); // runs the actual detection
 
     std::vector<float> angles = get_angles(segments);
     std::vector<int> labels = kmeans(angles);
@@ -167,6 +167,7 @@ int find_points_mire(cv::Mat& im_gray, cv::Mat& im_BGR, std::vector<std::vector<
 
     if (name != "None")
         cv::imshow(name, im_BGR);
+        cv::imshow(name + " Hough", im_hough_segments);
     std::vector<Point_Mire *> points_grille = find_pos(im_HSV, intersection_points);
 
     object_points = extract_object_points(points_grille);

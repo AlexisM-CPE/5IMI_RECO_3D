@@ -16,13 +16,18 @@ int main(int argc, char **argv)
 {
     // Loads an image
 
+    //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
+    //cv::Mat im_gray_1 = imread("data/mario/25.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    //cv::Mat im_gray_1 = imread("data/mario/9.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/9.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_BGR_1 = imread("data/mario/25.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_BGR_1 = imread("data/origami/1.jpg", cv::IMREAD_COLOR);
 
-    cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    //cv::Mat im_gray_2 = imread("data/mario/10.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/mario/10.jpg", cv::IMREAD_COLOR);
+    //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    //cv::Mat im_gray_2 = imread("data/mario/26.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_gray_2 = imread("data/origami/3.jpg", cv::IMREAD_GRAYSCALE);
+    //cv::Mat im_BGR_2 = imread("data/mario/26.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_BGR_2 = imread("data/origami/3.jpg", cv::IMREAD_COLOR);
+
 
     // Vectors containing the points used for the calibration
     std::vector<std::vector<cv::Point3f>> object_points_1;
@@ -50,10 +55,23 @@ int main(int argc, char **argv)
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, distCoeffs_2, M_int_2, M_ext_2, "Calibrage image 4");
 
     // Segmentation
-    cv::Mat segmented;
-    cv::Mat M_trans_seg = compute_transition_matrix(M_int_1, M_ext_1);
+    //cv::Mat segmented;
+    //cv::Mat M_trans_seg = compute_transition_matrix(M_int_1, M_ext_1);
     //segmentation(im_BGR_1, M_trans_seg, segmented);
     //imshow("segmentation", segmented);
+    cv::Mat R1 = M_ext_1(cv::Range(0,3), cv::Range(0,3));
+    cv::Mat R2 = M_ext_2(cv::Range(0,3), cv::Range(0,3));
+    cv::Mat R_2to1 = R1*R2.t();
+    cv::Mat H = cameraMatrix_1 * R_2to1 * cameraMatrix_1.inv();
+    H /= H.at<double>(2,2);
+    std::cout << "H:\n" << H << std::endl;
+    cv::Mat img_stitch;
+    cv::warpPerspective(im_BGR_2, img_stitch, H, cv::Size(im_BGR_2.cols*2, im_BGR_2.rows));
+    cv::Mat result;
+    cv::Mat half = img_stitch(cv::Rect(0, 0, im_BGR_1.cols, im_BGR_1.rows));
+    cv::addWeighted(im_BGR_1, 0.5, half, 0.5, 0, result);
+    //im_BGR_1.copyTo(half);
+    imshow("half", result);
 
     cv::Mat imageo1, imageo2;
     std::vector<cv::Point2f> matched_points1;
@@ -105,7 +123,6 @@ int main(int argc, char **argv)
         circle(im_gray_1, p, 2 / 2, cv::Scalar(255, 0, 0), 1);
     }
 
-
     cv::Point3f c1(0.0f, 0.0f, 0.0f);
     cv::Point3f c2(16.0f, 0.0f, 0.0f);
     cv::Point3f c3(0.0f, 16.0f, 0.0f);
@@ -116,7 +133,6 @@ int main(int argc, char **argv)
     coins.push_back(c2);
     coins.push_back(c3);
     coins.push_back(c4);
-
 
     //imshow("features", im_gray_1);
 
