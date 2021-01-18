@@ -39,7 +39,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     std::vector<cv::DMatch> match2;
     std::vector<cv::Point2f> test1;
 
-    const float ratio_thresh = 0.7f;
+    const float ratio_thresh = 0.5f;
     for (size_t i = 0; i < matches.size(); i++)
     {
         if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)

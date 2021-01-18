@@ -179,10 +179,10 @@ int main(int argc, char **argv)
     float eps_diff_1 = 0.1f;
     float eps_diff_2 = 0.1f;
 
-    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_32FC3, 255);
-    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_32FC3, 255);
-    im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 255);
-    im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 255);
+    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_32FC3, 1.0f / 255.0f);
+    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_32FC3, 1.0f / 255.0f);
+    im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 1.0f / 255.0f);
+    im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 1.0f / 255.0f);
 
     for (int i = 0; i < im_BGR_mire.rows; ++i)
     {
@@ -199,15 +199,9 @@ int main(int argc, char **argv)
             }
         }
     }
-    std::cout << im_BGR_2_clean.rows << "  " << im_BGR_2_clean.cols << std::endl;
-    std::cout << im_segmentee_diff_1.rows << "  " << im_segmentee_diff_1.cols << std::endl;
-    std::cout << im_BGR_mire.rows << "  " << im_BGR_mire.cols << std::endl;
-    std::cout << "kg" << std::endl;
 
-    cv::Mat im_segmentee_1;
-    im_segmentee_1 = im_segmentee_diff_1; //.clone();
-    cv::Mat im_segmentee_2;
-    im_segmentee_2 = im_segmentee_diff_2; //.clone();
+    cv::Mat im_segmentee_1 = im_segmentee_diff_1.clone();
+    cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
 
     for (unsigned int i = 10; i < im_BGR_mire.rows - 10; ++i)
     {
@@ -227,65 +221,26 @@ int main(int argc, char **argv)
             }
             if (count_1 > 21 * 21 * 3 / 8)
             {
-                im_segmentee_diff_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+                im_segmentee_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
             if (count_2 > 21 * 21 * 3 / 8)
             {
-                im_segmentee_diff_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+                im_segmentee_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
         }
     }
-    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_8UC3, 255);
-    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_8UC3, 255);
+    im_segmentee_1.convertTo(im_segmentee_1, CV_8UC3, 255);
+    im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
-    imshow("Image 1 segmentée", im_segmentee_diff_1);
-    imshow("Image 2 segmentée", im_segmentee_diff_2);
+    imshow("Image 1 segmentée", im_segmentee_1);
+    imshow("Image 2 segmentée", im_segmentee_2);
 
-    extract_features(im_segmentee_diff_1, im_segmentee_diff_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
+    extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
     std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
-    for (int i = 0; i < matched_points1.size(); i++)
-    {
-        circle(im_gray_2, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
-        circle(im_gray_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
-    }
-
-    imshow("Features image 1", im_gray_2);
-    imshow("Features image 2", im_gray_2);
-
-    float eps = 100.0f;
-    for (int i = 0; i < matched_points1.size(); i++)
-    {
-        cv::Mat p(3, 1, CV_64F);
-        p.at<double>(0, 0) = matched_points1[i].x;
-        p.at<double>(1, 0) = matched_points1[i].y;
-        p.at<double>(2, 0) = 1.0f;
-
-        cv::Mat p_m = H_mire_to_2 * p;
-
-        cv::Point2f p_transformed(p_m.at<double>(0, 0) / p_m.at<double>(2, 0), p_m.at<double>(1, 0) / p_m.at<double>(2, 0));
-
-        float a = sqrt(pow(p_transformed.x - matched_points2[i].x, 2) + pow(p_transformed.y - matched_points2[i].y, 2));
-
-        if (a < eps)
-        {
-            matched_transformed_1.push_back(matched_points2[i]);
-            matched_transformed_2.push_back(p_transformed);
-        }
-    }
-
-    std::cout << matched_transformed_1.size() << std::endl;
-
-    for (int i = 0; i < matched_transformed_1.size(); i++)
-    {
-        circle(im_features, matched_transformed_1[i], 1, cv::Scalar(0, 255, 0), 2);
-        circle(im_features, matched_transformed_2[i], 1, cv::Scalar(0, 0, 255), 2);
-    }
-
-    imshow("Features", im_features);
 
     while (true)
     {
