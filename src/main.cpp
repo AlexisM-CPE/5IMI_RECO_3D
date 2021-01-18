@@ -61,8 +61,8 @@ int main(int argc, char **argv)
     cv::Mat im_BGR_1 = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/mario/7.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/mario/7.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_2 = imread("data/mario/8.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread("data/mario/8.jpg", cv::IMREAD_COLOR);
 
     cv::Mat im_BGR_features_1 = im_BGR_1.clone();
     cv::Mat im_BGR_features_2 = im_BGR_2.clone();
