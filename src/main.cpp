@@ -245,7 +245,8 @@ int main(int argc, char **argv)
         }
     }
     im_segmentee.convertTo(im_segmentee, CV_8UC3, 255);
-    extract_features(im_segmentee, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 10000);
+    im_BGR_2_clone.convertTo(im_BGR_2_clone, CV_8UC3, 255);
+    extract_features(im_segmentee, im_BGR_2_clone, &imageo1, &imageo2, &matched_points1, &matched_points2, 10000);
     imshow("Gray ", im_diff_gray);
     imshow("New diff ", im_segmentee);
     imshow("diff ", im_BGR_2_clone);
