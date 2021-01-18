@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 1.0f / 255.0f);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 1.0f / 255.0f);
 
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 8)
     for (int i = 0; i < im_BGR_mire.rows; ++i)
     {
         for (int j = 0; j < im_BGR_mire.cols; ++j)
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
     get_box(x_min_1, x_max_1, y_min_1, y_max_1, M_transition_1);
     get_box(x_min_2, x_max_2, y_min_2, y_max_2, M_transition_2);
 
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 8)
     for (unsigned int i = x_min_1; i < x_max_1; ++i)
     {
         for (unsigned int j = y_min_1; j < y_max_1; ++j)
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
                 im_segmentee_1.at<cv::Vec3f>(i, j) = im_segmentee_diff_1.at<cv::Vec3f>(i, j);
         }
     }
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 8)
     for (unsigned int i = x_min_2; i < x_max_2; ++i)
     {
         for (unsigned int j = y_min_2; j < y_max_2; ++j)
