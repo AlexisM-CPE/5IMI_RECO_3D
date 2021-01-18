@@ -244,7 +244,8 @@ int main(int argc, char **argv)
             }
         }
     }
-
+    im_segmentee.convertTo(im_segmentee, CV_8UC3, 255);
+    extract_features(im_segmentee, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 10000);
     imshow("Gray ", im_diff_gray);
     imshow("New diff ", im_segmentee);
     imshow("diff ", im_BGR_2_clone);
@@ -254,12 +255,12 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < matched_points1.size(); i++)
     {
-        circle(im_BGR_features_1, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
-        circle(im_BGR_features_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
+        circle(im_gray_2, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
+        circle(im_gray_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
     }
 
-    imshow("Features image 1", im_BGR_features_1);
-    imshow("Features image 2", im_BGR_features_2);
+    imshow("Features image 1", im_gray_2);
+    imshow("Features image 2", im_gray_2);
 
     float eps = 100.0f;
     for (int i = 0; i < matched_points1.size(); i++)
