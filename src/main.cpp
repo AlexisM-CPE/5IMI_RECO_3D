@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     cv::Mat distCoeffs_1;
     cv::Mat distCoeffs_2;
 
-    Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, distCoeffs_1, M_int_1, M_ext_1, "lwjfhsdlijfbsdjgbsd");
+    Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, distCoeffs_1, M_int_1, M_ext_1);
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, distCoeffs_2, M_int_2, M_ext_2);
 
     // Segmentation
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
-
+    std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
     for (int i = 0; i < matched_points1.size(); i++)
     {
         circle(im_gray_2, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
