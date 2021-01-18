@@ -10,7 +10,7 @@
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *matched_points1, std::vector<cv::Point2f> *matched_points2, int threshold)
 {
-    // Feature detection
+    //Feature detection
     // std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     // cv::Mat descriptors1, descriptors2;
     // cv::Ptr<cv::ORB> detector = cv::ORB::create(threshold, 1.2, 2, 31, 0, 4, cv::ORB::HARRIS_SCORE, 31);
@@ -19,9 +19,15 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
 
     std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     cv::Mat descriptors1, descriptors2;
-    cv::Ptr<cv::FastFeatureDetector> detector = cv::FastFeatureDetector::create();
-    detector->detect(image_in1, keyPoints1);
-    detector->detect(image_in2, keyPoints2);
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, true, false);
+    detector->detectAndCompute(image_in1, cv::Mat(), keyPoints1, descriptors1);
+    detector->detectAndCompute(image_in2, cv::Mat(), keyPoints2, descriptors2);
+
+    // std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
+    // cv::Mat descriptors1, descriptors2;
+    // cv::Ptr<cv::FastFeatureDetector> detector = cv::FastFeatureDetector::create();
+    // detector->detect(image_in1, keyPoints1);
+    // detector->detect(image_in2, keyPoints2);
     // detector->compute(image_in1, keyPoints1, descriptors1);
     // detector->compute(image_in2, keyPoints2, descriptors2);
 
@@ -39,7 +45,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     std::vector<cv::DMatch> match2;
     std::vector<cv::Point2f> test1;
 
-    const float ratio_thresh = 0.7f;
+    const float ratio_thresh = 0.5f;
     for (size_t i = 0; i < matches.size(); i++)
     {
         if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)
@@ -87,6 +93,6 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     // line(*image_out1, scene_corners[3] + cv::Point2f((float)image_in2.cols, 0),
     //      scene_corners[0] + cv::Point2f((float)image_in2.cols, 0), cv::Scalar(0, 255, 0), 4);
 
-    //     cv::imshow("1", *image_out1);
+    cv::imshow("1", *image_out1);
     //cv::KeyPointsFilter::retainBest(keypointsD, threshold);
 }

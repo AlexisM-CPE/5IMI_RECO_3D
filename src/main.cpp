@@ -11,6 +11,7 @@
 #include "utils.hpp"
 #include <iostream>
 #include <cmath>
+#include <omp.h>
 
 std::string type2str(int type)
 {
@@ -57,8 +58,11 @@ int main(int argc, char **argv)
     // Loads an image
 
     //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_mire = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_mire = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
+
+    cv::Mat im_gray_1 = imread("data/mario/6.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/6.jpg", cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_gray_2 = imread("data/mario/8.jpg", cv::IMREAD_GRAYSCALE);
@@ -68,18 +72,28 @@ int main(int argc, char **argv)
     cv::Mat im_BGR_features_2 = im_BGR_2.clone();
     cv::Mat im_features = im_BGR_2.clone();
 
-    cv::Mat im_BGR_2_clone = im_BGR_2.clone();
+    cv::Mat im_BGR_2_clean = im_BGR_2.clone();
+    cv::Mat im_BGR_1_clean = im_BGR_1.clone();
+    cv::Mat im_BGR_mire_clean = im_BGR_mire.clone();
 
     // Vectors containing the points used for the calibration
+
+    std::vector<std::vector<cv::Point3f>> object_points_mire;
+    std::vector<std::vector<cv::Point2f>> image_points_mire;
+
     std::vector<std::vector<cv::Point3f>> object_points_1;
     std::vector<std::vector<cv::Point2f>> image_points_1;
 
     std::vector<std::vector<cv::Point3f>> object_points_2;
     std::vector<std::vector<cv::Point2f>> image_points_2;
 
-    find_points_mire(im_gray_1, im_BGR_1, object_points_1, image_points_1, "ojb");
-    std::cout << "--------IMAGE 4 --------" << std::endl;
+    find_points_mire(im_gray_mire, im_BGR_mire, object_points_mire, image_points_mire);
+    find_points_mire(im_gray_1, im_BGR_1, object_points_1, image_points_1);
     find_points_mire(im_gray_2, im_BGR_2, object_points_2, image_points_2);
+
+    cv::Mat M_int_mire(3, 4, CV_64F);
+    cv::Mat M_ext_mire(4, 4, CV_64F);
+    cv::Mat cameraMatrix_mire(3, 3, CV_64F);
 
     cv::Mat M_int_1(3, 4, CV_64F);
     cv::Mat M_ext_1(4, 4, CV_64F);
@@ -89,61 +103,35 @@ int main(int argc, char **argv)
     cv::Mat M_ext_2(4, 4, CV_64F);
     cv::Mat cameraMatrix_2(3, 3, CV_64F);
 
+    cv::Mat distCoeffs_mire;
     cv::Mat distCoeffs_1;
     cv::Mat distCoeffs_2;
 
+    Calibrate(im_gray_mire, im_BGR_mire, object_points_mire, image_points_mire, cameraMatrix_mire, distCoeffs_mire, M_int_mire, M_ext_mire);
     Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, distCoeffs_1, M_int_1, M_ext_1);
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, distCoeffs_2, M_int_2, M_ext_2);
 
     // Segmentation
-    cv::Mat segmented;
-    cv::Mat M_trans_seg = compute_transition_matrix(M_int_1, M_ext_1);
-    //segmentation(im_BGR_1, M_trans_seg, segmented);
-    //imshow("segmentation", segmented);
+    cv::Mat im_segmented_1;
+    cv::Mat im_segmented_2;
 
-    cv::Mat imageo1, imageo2;
+    cv::Mat output_segmentation_1, output_segmentation_2;
     std::vector<cv::Point2f> matched_points1;
     std::vector<cv::Point2f> matched_points2;
-    extract_features(im_gray_1, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 10000);
+    // extract_features(im_gray_1, im_gray_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 
     cv::Point3f camera_pos_1 = get_camera_position(M_ext_1);
     cv::Point3f camera_pos_2 = get_camera_position(M_ext_2);
 
-    std::cout << " Cam  : " << camera_pos_2.x << "   " << camera_pos_2.y << "   " << camera_pos_2.z << std::endl;
-
     cv::Mat M_transition_1 = compute_transition_matrix(M_int_1, M_ext_1);
     cv::Mat M_transition_2 = compute_transition_matrix(M_int_2, M_ext_2);
+    cv::Mat M_transition_mire = compute_transition_matrix(M_int_mire, M_ext_mire);
 
-    cv::Mat centre_mire(4, 1, CV_64F);
-    centre_mire.at<double>(0, 0) = 8 * 12.375f;
-    centre_mire.at<double>(1, 0) = 8 * 12.375f;
-    centre_mire.at<double>(2, 0) = 0.0f;
-    centre_mire.at<double>(3, 0) = 1.0f;
+    // std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
 
-    cv::Mat centre_mire_im_1 = M_transition_1 * centre_mire;
-    cv::Mat centre_mire_im_2 = M_transition_2 * centre_mire;
-
-    centre_mire_im_1 /= centre_mire_im_1.at<double>(2, 0);
-    centre_mire_im_2 /= centre_mire_im_2.at<double>(2, 0);
-
-    float translation_y = centre_mire_im_2.at<double>(0, 0) - centre_mire_im_1.at<double>(0, 0);
-    float translation_x = centre_mire_im_2.at<double>(1, 0) - centre_mire_im_1.at<double>(1, 0);
-
-    // cv::Mat new_image = cv::Mat::zeros(846, 1504, CV_32FC3);
-    // for (int i = 0; i < 846; i++)
-    // {
-    //     for (int j = 0; j < 1504; j++)
-    //     {
-    //         new_image.at<cv::Vec3f>(i, j) = im_BGR_2.at<cv::Vec3f>(int(i + round(translation_x)), int(j + round(translation_y)));
-    //     }
-    // }
-
-    // imshow("New image", new_image - im_BGR_1);
-
-    std::vector<cv::Point3f> features_3D = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
-
-    std::vector<cv::Point2f> obj;
-    std::vector<cv::Point2f> scene;
+    std::vector<cv::Point2f> points_mire_in_1;
+    std::vector<cv::Point2f> points_mire_in_2;
+    std::vector<cv::Point2f> points_mire_in_image_mire;
 
     for (int i = 0; i < 17; i++)
     {
@@ -156,142 +144,120 @@ int main(int argc, char **argv)
             p.at<double>(3, 0) = 1.0f;
             cv::Mat p_m1 = M_transition_1 * p;
             cv::Mat p_m2 = M_transition_2 * p;
+            cv::Mat p_mire = M_transition_mire * p;
             p_m1 /= p_m1.at<double>(2, 0);
             p_m2 /= p_m2.at<double>(2, 0);
+            p_mire /= p_mire.at<double>(2, 0);
 
-            obj.push_back(cv::Point2f(p_m1.at<double>(0, 0) / p_m1.at<double>(2, 0), p_m1.at<double>(1, 0) / p_m1.at<double>(2, 0)));
-            scene.push_back(cv::Point2f(p_m2.at<double>(0, 0) / p_m2.at<double>(2, 0), p_m2.at<double>(1, 0) / p_m2.at<double>(2, 0)));
+            points_mire_in_1.push_back(cv::Point2f(p_m1.at<double>(0, 0), p_m1.at<double>(1, 0)));
+            points_mire_in_2.push_back(cv::Point2f(p_m2.at<double>(0, 0), p_m2.at<double>(1, 0)));
+            points_mire_in_image_mire.push_back(cv::Point2f(p_mire.at<double>(0, 0), p_mire.at<double>(1, 0)));
         }
     }
 
-    cv::Mat H = cv::findHomography(obj, scene, cv::RANSAC);
+    cv::Mat H_mire_to_1 = cv::findHomography(points_mire_in_image_mire, points_mire_in_1, cv::RANSAC);
+    cv::Mat H_mire_to_2 = cv::findHomography(points_mire_in_image_mire, points_mire_in_2, cv::RANSAC);
 
-    cv::Mat new_image = cv::Mat::zeros(846, 1504, CV_32FC3);
+    cv::Mat mire_image_in_1;
+    cv::Mat mire_image_in_2;
 
-    cv::Mat H_inv = H.inv();
+    // cv::Mat mire_image_in_2 = cv::Mat::zeros(846, 1504, CV_32FC3);
 
-    std::cout << H_inv.rows << "   " << H_inv.cols << std::endl;
+    cv::Mat H_inv = H_mire_to_2.inv();
 
-    warpPerspective(im_BGR_1, new_image, H, im_BGR_2.size());
+    warpPerspective(im_BGR_mire, mire_image_in_1, H_mire_to_1, im_BGR_2.size());
+    warpPerspective(im_BGR_mire, mire_image_in_2, H_mire_to_2, im_BGR_2.size());
 
-    imshow("New image ", new_image);
+    imshow("Mire in image 1", mire_image_in_1);
+    imshow("Mire in image 2", mire_image_in_2);
 
-    imshow("New image 2", abs(new_image - im_BGR_2));
-
-    cv::Mat im_diff = abs(im_BGR_2 - new_image);
-    cv::Mat im_diff_gray;
-    cv::cvtColor(im_diff, im_diff_gray, cv::COLOR_BGR2GRAY);
-
-    // cv::Mat im_seg(im_diff.rows, im_diff.cols, CV_32FC3);
-    cv::Mat im_seg(846, 1504, CV_32FC3); //
-    std::cout << "type bgr : " << type2str(im_BGR_2_clone.type()) << std::endl;
-    im_BGR_2_clone.convertTo(im_BGR_2_clone, CV_32FC3, 1.0 / 255.0);
-    im_seg = im_BGR_2_clone.clone();
-
-    cv::Mat zeros = cv::Mat::zeros(846, 1504, CV_32FC3);
-
-    std::cout << "Type : " << im_seg.type() << std::endl;
-
-    cv::Mat abc = im_diff - im_seg;
+    cv::Mat im_segmentee_diff_1;
+    im_segmentee_diff_1 = im_BGR_1_clean.clone();
+    cv::Mat im_segmentee_diff_2;
+    im_segmentee_diff_2 = im_BGR_2_clean.clone();
 
     float eps_diff_0 = 0.10f;
     float eps_diff_1 = 0.1f;
     float eps_diff_2 = 0.1f;
 
-    //cvtColor(im_BGR_2_clone, im_BGR_2_clone, cv::COLOR_BGR2HSV);
-    //cvtColor(new_image, new_image, cv::COLOR_BGR2HSV);
+    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_32FC3, 1.0f / 255.0f);
+    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_32FC3, 1.0f / 255.0f);
+    im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 1.0f / 255.0f);
+    im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 1.0f / 255.0f);
 
-    std::cout << new_image.rows << "  " << new_image.cols << std::endl;
-    std::cout << im_BGR_2_clone.rows << "  " << im_BGR_2_clone.cols << std::endl;
-
-    for (int i = 0; i < im_diff.rows; ++i)
+#pragma omp parallel for schedule(dynamic, 8)
+    for (int i = 0; i < im_BGR_mire.rows; ++i)
     {
-        for (int j = 0; j < im_diff.cols; ++j)
+        for (int j = 0; j < im_BGR_mire.cols; ++j)
         {
+            if (((abs(im_BGR_1_clean.at<cv::Vec3f>(i, j)[0] - mire_image_in_1.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_1_clean.at<cv::Vec3f>(i, j)[1] - mire_image_in_1.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_1_clean.at<cv::Vec3f>(i, j)[2] - mire_image_in_1.at<cv::Vec3f>(i, j)[2]) < eps_diff_2)) || out_of_rectangle(i, j, M_transition_1))
+            {
+                im_segmentee_diff_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+            }
 
-            if (((abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[0] - new_image.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[1] - new_image.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_2_clone.at<cv::Vec3f>(i, j)[2] - new_image.at<cv::Vec3f>(i, j)[2]) < eps_diff_2)) || out_of_rectangle(i, j, M_transition_2))
+            if (((abs(im_BGR_2_clean.at<cv::Vec3f>(i, j)[0] - mire_image_in_2.at<cv::Vec3f>(i, j)[0]) < eps_diff_0) && (abs(im_BGR_2_clean.at<cv::Vec3f>(i, j)[1] - mire_image_in_2.at<cv::Vec3f>(i, j)[1]) < eps_diff_1) && (abs(im_BGR_2_clean.at<cv::Vec3f>(i, j)[2] - mire_image_in_2.at<cv::Vec3f>(i, j)[2]) < eps_diff_2)) || out_of_rectangle(i, j, M_transition_2))
             {
-                //std::cout << im_seg.at<cv::Vec3f>(i, j).type() << std::endl;
-                im_seg.at<cv::Vec3f>(i, j) = zeros.at<cv::Vec3f>(i, j); //cv::Vec3f(0, 0, 0);
-                // std::cout << im_diff_gray.at<float>(i, j) << std::endl;
+                im_segmentee_diff_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
-            else
-            {
-                //im_seg.at<cv::Vec3f>(i, j) = im_BGR_2.at<cv::Vec3f>(i, j);
-            }
-            //std::cout << i << " " << j << std::endl;
         }
     }
 
-    cv::Mat im_segmentee = im_seg.clone();
+    cv::Mat im_segmentee_1 = cv::Mat::zeros(846, 1504, im_segmentee_diff_1.type());
+    cv::Mat im_segmentee_2 = cv::Mat::zeros(846, 1504, im_segmentee_diff_2.type());
+    // cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
 
-    for (unsigned int i = 10; i < im_diff.rows - 10; ++i)
+    int x_min_1, x_max_1, y_min_1, y_max_1, x_min_2, x_max_2, y_min_2, y_max_2;
+    get_box(x_min_1, x_max_1, y_min_1, y_max_1, M_transition_1);
+    get_box(x_min_2, x_max_2, y_min_2, y_max_2, M_transition_2);
+
+#pragma omp parallel for schedule(dynamic, 8)
+    for (unsigned int i = x_min_1; i < x_max_1; ++i)
     {
-        for (unsigned int j = 10; j < im_diff.cols - 10; ++j)
+        for (unsigned int j = y_min_1; j < y_max_1; ++j)
         {
-            int count = 0;
+            int count_1 = 0;
             for (int k = -10; k <= 10; k++)
             {
                 for (int l = -10; l <= 10; l++)
                 {
-                    if (norm(im_seg.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
-                        count += 1;
+                    if (norm(im_segmentee_diff_1.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
+                        count_1 += 1;
                 }
             }
-            if (count > 21 * 21 * 3 / 8)
-            {
-                im_segmentee.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
-            }
+            if (count_1 < 21 * 21 * 3 / 8)
+                im_segmentee_1.at<cv::Vec3f>(i, j) = im_segmentee_diff_1.at<cv::Vec3f>(i, j);
         }
     }
-    im_segmentee.convertTo(im_segmentee, CV_8UC3, 255);
-    extract_features(im_segmentee, im_gray_2, &imageo1, &imageo2, &matched_points1, &matched_points2, 10000);
-    imshow("Gray ", im_diff_gray);
-    imshow("New diff ", im_segmentee);
-    imshow("diff ", im_BGR_2_clone);
+#pragma omp parallel for schedule(dynamic, 8)
+    for (unsigned int i = x_min_2; i < x_max_2; ++i)
+    {
+        for (unsigned int j = y_min_2; j < y_max_2; ++j)
+        {
+            int count_2 = 0;
+            for (int k = -10; k <= 10; k++)
+            {
+                for (int l = -10; l <= 10; l++)
+                {
+                    if (norm(im_segmentee_diff_2.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
+                        count_2 += 1;
+                }
+            }
+            if (count_2 < 21 * 21 * 3 / 8)
+                im_segmentee_2.at<cv::Vec3f>(i, j) = im_segmentee_diff_2.at<cv::Vec3f>(i, j);
+        }
+    }
+    im_segmentee_1.convertTo(im_segmentee_1, CV_8UC3, 255);
+    im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
+    im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
+    im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
+    imshow("Image 1 segmentee", im_segmentee_1);
+    imshow("Image 2 segmentee", im_segmentee_2);
+
+    extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
     std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
-    for (int i = 0; i < matched_points1.size(); i++)
-    {
-        circle(im_gray_2, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
-        circle(im_gray_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
-    }
-
-    imshow("Features image 1", im_gray_2);
-    imshow("Features image 2", im_gray_2);
-
-    float eps = 100.0f;
-    for (int i = 0; i < matched_points1.size(); i++)
-    {
-        cv::Mat p(3, 1, CV_64F);
-        p.at<double>(0, 0) = matched_points1[i].x;
-        p.at<double>(1, 0) = matched_points1[i].y;
-        p.at<double>(2, 0) = 1.0f;
-
-        cv::Mat p_m = H * p;
-
-        cv::Point2f p_transformed(p_m.at<double>(0, 0) / p_m.at<double>(2, 0), p_m.at<double>(1, 0) / p_m.at<double>(2, 0));
-
-        float a = sqrt(pow(p_transformed.x - matched_points2[i].x, 2) + pow(p_transformed.y - matched_points2[i].y, 2));
-
-        if (a < eps)
-        {
-            matched_transformed_1.push_back(matched_points2[i]);
-            matched_transformed_2.push_back(p_transformed);
-        }
-    }
-
-    std::cout << matched_transformed_1.size() << std::endl;
-
-    for (int i = 0; i < matched_transformed_1.size(); i++)
-    {
-        circle(im_features, matched_transformed_1[i], 1, cv::Scalar(0, 255, 0), 2);
-        circle(im_features, matched_transformed_2[i], 1, cv::Scalar(0, 0, 255), 2);
-    }
-
-    imshow("Features", im_features);
 
     while (true)
     {

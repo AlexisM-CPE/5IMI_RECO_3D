@@ -353,3 +353,55 @@ bool out_of_rectangle(int i, int j, cv::Mat M_transition)
     else
         return false;
 }
+
+void get_box(int &x_min, int &x_max, int &y_min, int &y_max, cv::Mat M_transition)
+{
+    cv::Mat c0(4, 1, CV_64F);
+    cv::Mat c1(4, 1, CV_64F);
+    cv::Mat c2(4, 1, CV_64F);
+    cv::Mat c3(4, 1, CV_64F);
+
+    c0.at<double>(0, 0) = 0.0f + offset * 12.4f;
+    c0.at<double>(1, 0) = 0.0f + offset * 12.4f;
+    c0.at<double>(2, 0) = 0.0f;
+    c0.at<double>(3, 0) = 1.0f;
+
+    c3.at<double>(0, 0) = (16.0f - offset) * 12.4f;
+    c3.at<double>(1, 0) = 0.0f + offset * 12.4f;
+    c3.at<double>(2, 0) = 0.0f;
+    c3.at<double>(3, 0) = 1.0f;
+
+    c2.at<double>(0, 0) = (16.0f - offset) * 12.4f;
+    c2.at<double>(1, 0) = (16.0f - offset) * 12.4f;
+    c2.at<double>(2, 0) = 0.0f;
+    c2.at<double>(3, 0) = 1.0f;
+
+    c1.at<double>(0, 0) = 0.0f + offset * 12.4f;
+    c1.at<double>(1, 0) = (16.0f - offset) * 12.4f;
+    c1.at<double>(2, 0) = 0.0f;
+    c1.at<double>(3, 0) = 1.0f;
+
+    cv::Mat p0 = M_transition * c0;
+    cv::Mat p1 = M_transition * c1;
+    cv::Mat p2 = M_transition * c2;
+    cv::Mat p3 = M_transition * c3;
+
+    cv::Point2f t0(p0.at<double>(0, 0) / p0.at<double>(2, 0), p0.at<double>(1, 0) / p0.at<double>(2, 0));
+    cv::Point2f t1(p1.at<double>(0, 0) / p1.at<double>(2, 0), p1.at<double>(1, 0) / p1.at<double>(2, 0));
+    cv::Point2f t2(p2.at<double>(0, 0) / p2.at<double>(2, 0), p2.at<double>(1, 0) / p2.at<double>(2, 0));
+    cv::Point2f t3(p3.at<double>(0, 0) / p3.at<double>(2, 0), p3.at<double>(1, 0) / p3.at<double>(2, 0));
+
+    x_min = std::min(std::min(t0.x, t1.x), std::min(t2.x, t3.x));
+    x_max = std::max(std::max(t0.x, t1.x), std::max(t2.x, t3.x));
+    y_min = std::min(std::min(t0.y, t1.y), std::min(t2.y, t3.y));
+    y_max = std::max(std::max(t0.y, t1.y), std::max(t2.y, t3.y));
+
+    if (x_min < 10)
+        x_min = 10;
+    if (x_max > 846 - 10)
+        x_max = 846 - 10;
+    if (y_min < 10)
+        y_min = 10;
+    if (y_max > 1504 - 10)
+        y_max = 1504 - 10;
+}
