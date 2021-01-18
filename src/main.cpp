@@ -203,9 +203,9 @@ int main(int argc, char **argv)
     cv::Mat im_segmentee_1 = im_segmentee_diff_1.clone();
     cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
 
-    for (unsigned int i = 10; i < im_BGR_mire.rows - 10; ++i)
+    for (unsigned int i = 10; i < (unsigned int)im_BGR_mire.rows - 10; ++i)
     {
-        for (unsigned int j = 10; j < im_BGR_mire.cols - 10; ++j)
+        for (unsigned int j = 10; j < (unsigned int)im_BGR_mire.cols - 10; ++j)
         {
             int count_1 = 0;
             int count_2 = 0;
