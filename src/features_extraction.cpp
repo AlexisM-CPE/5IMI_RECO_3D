@@ -44,7 +44,6 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     {
         if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)
         {
-            std::cout << "test" << std::endl;
             match1.push_back(matches[i][0]);
             match2.push_back(matches[i][1]);
             matched_points1->push_back(keyPoints1[matches[i][0].queryIdx].pt);
