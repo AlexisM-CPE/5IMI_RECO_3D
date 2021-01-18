@@ -11,6 +11,7 @@
 #include "utils.hpp"
 #include <iostream>
 #include <cmath>
+#include <omp.h>
 
 std::string type2str(int type)
 {
@@ -184,6 +185,7 @@ int main(int argc, char **argv)
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 1.0f / 255.0f);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 1.0f / 255.0f);
 
+#pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < im_BGR_mire.rows; ++i)
     {
         for (int j = 0; j < im_BGR_mire.cols; ++j)
@@ -200,41 +202,56 @@ int main(int argc, char **argv)
         }
     }
 
-    cv::Mat im_segmentee_1 = im_segmentee_diff_1.clone();
-    cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
+    cv::Mat im_segmentee_1 = cv::Mat::zeros(846, 1504, im_segmentee_diff_1.type());
+    cv::Mat im_segmentee_2 = cv::Mat::zeros(846, 1504, im_segmentee_diff_2.type());
+    // cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
 
-    for (unsigned int i = 10; i < (unsigned int)im_BGR_mire.rows - 10; ++i)
+    int x_min_1, x_max_1, y_min_1, y_max_1, x_min_2, x_max_2, y_min_2, y_max_2;
+    get_box(x_min_1, x_max_1, y_min_1, y_max_1, M_transition_1);
+    get_box(x_min_2, x_max_2, y_min_2, y_max_2, M_transition_2);
+
+#pragma omp parallel for schedule(dynamic, 1)
+    for (unsigned int i = x_min_1; i < x_max_1; ++i)
     {
-        for (unsigned int j = 10; j < (unsigned int)im_BGR_mire.cols - 10; ++j)
+        for (unsigned int j = y_min_1; j < y_max_1; ++j)
         {
             int count_1 = 0;
-            int count_2 = 0;
             for (int k = -10; k <= 10; k++)
             {
                 for (int l = -10; l <= 10; l++)
                 {
                     if (norm(im_segmentee_diff_1.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
                         count_1 += 1;
+                }
+            }
+            if (count_1 < 21 * 21 * 3 / 8)
+                im_segmentee_1.at<cv::Vec3f>(i, j) = im_segmentee_diff_1.at<cv::Vec3f>(i, j);
+        }
+    }
+#pragma omp parallel for schedule(dynamic, 1)
+    for (unsigned int i = x_min_2; i < x_max_2; ++i)
+    {
+        for (unsigned int j = y_min_2; j < y_max_2; ++j)
+        {
+            int count_2 = 0;
+            for (int k = -10; k <= 10; k++)
+            {
+                for (int l = -10; l <= 10; l++)
+                {
                     if (norm(im_segmentee_diff_2.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
                         count_2 += 1;
                 }
             }
-            if (count_1 > 21 * 21 * 3 / 8)
-            {
-                im_segmentee_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
-            }
-            if (count_2 > 21 * 21 * 3 / 8)
-            {
-                im_segmentee_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
-            }
+            if (count_2 < 21 * 21 * 3 / 8)
+                im_segmentee_2.at<cv::Vec3f>(i, j) = im_segmentee_diff_2.at<cv::Vec3f>(i, j);
         }
     }
     im_segmentee_1.convertTo(im_segmentee_1, CV_8UC3, 255);
     im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
-    imshow("Image 1 segmentée", im_segmentee_1);
-    imshow("Image 2 segmentée", im_segmentee_2);
+    imshow("Image 1 segmentee", im_segmentee_1);
+    imshow("Image 2 segmentee", im_segmentee_2);
 
     extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 

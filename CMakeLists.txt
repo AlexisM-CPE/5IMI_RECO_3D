@@ -35,7 +35,7 @@ if (WIN32)
   #set(LINK_FLAGS_PERSO )
 else (WIN32)
   #set(LINK_FLAGS_PERSO -lm -ldl)
-  add_definitions( -Wall -Wextra -Wno-comment -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -DCORRECTION -g)
+  add_definitions( -Wall -Wextra -Wno-comment -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -DCORRECTION -g -DCMAKE_C_FLAGS=-fopenmp -DCMAKE_EXE_LINKER_FLAGS=-fopenmp)
 endif (WIN32)
 
 add_executable( 

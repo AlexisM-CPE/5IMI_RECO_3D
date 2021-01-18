@@ -19,3 +19,5 @@ void create_cloud_file(std::vector<cv::Point3f> points, std::string filename);
 std::vector<cv::Point3f> read_cloud_file(std::string filename);
 
 bool out_of_rectangle(int i, int j, cv::Mat M_transition);
+
+void get_box(int &x_min, int &x_max, int &y_min, int &y_max, cv::Mat M_transition);
