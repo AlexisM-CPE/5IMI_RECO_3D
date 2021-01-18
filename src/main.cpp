@@ -170,12 +170,19 @@ int main(int argc, char **argv)
     imshow("Mire in image 1", mire_image_in_1);
     imshow("Mire in image 2", mire_image_in_2);
 
-    cv::Mat im_segmentee_diff_1 = im_BGR_1_clean.clone();
-    cv::Mat im_segmentee_diff_2 = im_BGR_2_clean.clone();
+    cv::Mat im_segmentee_diff_1;
+    im_segmentee_diff_1 = im_BGR_1_clean.clone();
+    cv::Mat im_segmentee_diff_2;
+    im_segmentee_diff_2 = im_BGR_2_clean.clone();
 
     float eps_diff_0 = 0.10f;
     float eps_diff_1 = 0.1f;
     float eps_diff_2 = 0.1f;
+
+    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_32FC3, 255);
+    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_32FC3, 255);
+    im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_32FC3, 255);
+    im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_32FC3, 255);
 
     for (int i = 0; i < im_BGR_mire.rows; ++i)
     {
@@ -191,11 +198,16 @@ int main(int argc, char **argv)
                 im_segmentee_diff_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
         }
-        std::cout << i << std::endl;
     }
+    std::cout << im_BGR_2_clean.rows << "  " << im_BGR_2_clean.cols << std::endl;
+    std::cout << im_segmentee_diff_1.rows << "  " << im_segmentee_diff_1.cols << std::endl;
+    std::cout << im_BGR_mire.rows << "  " << im_BGR_mire.cols << std::endl;
+    std::cout << "kg" << std::endl;
 
-    cv::Mat im_segmentee_1 = im_segmentee_diff_1.clone();
-    cv::Mat im_segmentee_2 = im_segmentee_diff_2.clone();
+    cv::Mat im_segmentee_1;
+    im_segmentee_1 = im_segmentee_diff_1; //.clone();
+    cv::Mat im_segmentee_2;
+    im_segmentee_2 = im_segmentee_diff_2; //.clone();
 
     for (unsigned int i = 10; i < im_BGR_mire.rows - 10; ++i)
     {
@@ -215,24 +227,22 @@ int main(int argc, char **argv)
             }
             if (count_1 > 21 * 21 * 3 / 8)
             {
-                std::cout << "c" << std::endl;
-                im_segmentee_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+                im_segmentee_diff_1.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
             if (count_2 > 21 * 21 * 3 / 8)
             {
-                std::cout << "d" << std::endl;
-                im_segmentee_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
+                im_segmentee_diff_2.at<cv::Vec3f>(i, j) = cv::Vec3f(0.0f, 0.0f, 0.0f);
             }
         }
     }
-    im_segmentee_1.convertTo(im_segmentee_1, CV_8UC3, 255);
-    im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
+    im_segmentee_diff_1.convertTo(im_segmentee_diff_1, CV_8UC3, 255);
+    im_segmentee_diff_2.convertTo(im_segmentee_diff_2, CV_8UC3, 255);
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
-    imshow("Image 1 segmentée", im_segmentee_1);
-    imshow("Image 2 segmentée", im_segmentee_2);
+    imshow("Image 1 segmentée", im_segmentee_diff_1);
+    imshow("Image 2 segmentée", im_segmentee_diff_2);
 
-    extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
+    extract_features(im_segmentee_diff_1, im_segmentee_diff_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
