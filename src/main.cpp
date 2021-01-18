@@ -57,8 +57,11 @@ int main(int argc, char **argv)
     // Loads an image
 
     //cv::Mat im_gray_1 = imread("data/origami/1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_1 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_mire = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_mire = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
+
+    cv::Mat im_gray_1 = imread("data/mario/6.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread("data/mario/6.jpg", cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_gray_2 = imread("data/mario/7.jpg", cv::IMREAD_GRAYSCALE);
@@ -71,15 +74,24 @@ int main(int argc, char **argv)
     cv::Mat im_BGR_2_clone = im_BGR_2.clone();
 
     // Vectors containing the points used for the calibration
+
+    std::vector<std::vector<cv::Point3f>> object_points_mire;
+    std::vector<std::vector<cv::Point2f>> image_points_mire;
+
     std::vector<std::vector<cv::Point3f>> object_points_1;
     std::vector<std::vector<cv::Point2f>> image_points_1;
 
     std::vector<std::vector<cv::Point3f>> object_points_2;
     std::vector<std::vector<cv::Point2f>> image_points_2;
 
+    find_points_mire(im_gray_mire, im_BGR_mire, object_points_mire, image_points_mire);
     find_points_mire(im_gray_1, im_BGR_1, object_points_1, image_points_1, "ojb");
     std::cout << "--------IMAGE 4 --------" << std::endl;
     find_points_mire(im_gray_2, im_BGR_2, object_points_2, image_points_2);
+
+    cv::Mat M_int_mire(3, 4, CV_64F);
+    cv::Mat M_ext_mire(4, 4, CV_64F);
+    cv::Mat cameraMatrix_mire(3, 3, CV_64F);
 
     cv::Mat M_int_1(3, 4, CV_64F);
     cv::Mat M_ext_1(4, 4, CV_64F);
@@ -89,9 +101,11 @@ int main(int argc, char **argv)
     cv::Mat M_ext_2(4, 4, CV_64F);
     cv::Mat cameraMatrix_2(3, 3, CV_64F);
 
+    cv::Mat distCoeffs_mire;
     cv::Mat distCoeffs_1;
     cv::Mat distCoeffs_2;
 
+    Calibrate(im_gray_mire, im_BGR_mire, object_points_mire, image_points_mire, cameraMatrix_mire, distCoeffs_mire, M_int_mire, M_ext_mire);
     Calibrate(im_gray_1, im_BGR_1, object_points_1, image_points_1, cameraMatrix_1, distCoeffs_1, M_int_1, M_ext_1);
     Calibrate(im_gray_2, im_BGR_2, object_points_2, image_points_2, cameraMatrix_2, distCoeffs_2, M_int_2, M_ext_2);
 
