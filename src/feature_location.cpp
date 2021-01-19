@@ -1,5 +1,7 @@
 #include "feature_location.hpp"
 
+#define RADIUS 50.0f
+
 cv::Mat create_M_int(cv::Mat cameraMatrix)
 {
     cv::Mat M_int = cv::Mat::zeros(3, 4, CV_64F);
@@ -143,7 +145,7 @@ cv::Point3f find_intersection(cv::Point3f feature_world_2d_1, cv::Point3f cam_pr
     float t_prime = T.at<double>(1, 0);
     if (abs(x1 + alpha1 / norm_1 * t - (x2 + alpha2 / norm_2 * t_prime)) > eps || abs(y1 + beta1 / norm_1 * t - (y2 + beta2 / norm_2 * t_prime)) > eps)
     {
-        std::cout << "No intersection" << std::endl;
+        //std::cout << "No intersection" << std::endl;
         return intersection;
     }
     else
@@ -181,7 +183,7 @@ std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> featur
         float h_2 = H_2 * dist_ft_proj_2 / dist_ft_cam_2;
 
         float h = (h_1 + h_2) / 2;
-        if (sqrt(pow(feature_proj.x - 8.0f * 12.375f, 2) + pow(feature_proj.y - 8.0f * 12.375f, 2)) < 70.0f)
+        if (sqrt(pow(feature_proj.x - 8.0f * 12.375f, 2) + pow(feature_proj.y - 8.0f * 12.375f, 2) + pow(feature_proj.z, 2)) < RADIUS)
         {
             cv::Point3f feature(feature_proj.x, feature_proj.y, h);
             features.push_back(feature);

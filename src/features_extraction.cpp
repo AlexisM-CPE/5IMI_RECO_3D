@@ -8,7 +8,8 @@
 
 #include <iostream>
 
-#define dist_eps 2.0f
+#define dist_eps 10.0f
+#define MAX_DIFF_COLOR 60
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *features_finale_1, std::vector<cv::Point2f> *features_finale_2, int threshold)
 {
@@ -112,8 +113,11 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
         }
         if (dist_min < dist_eps)
         {
-            features_finale_1->push_back(features_1_in_1[i]);
-            features_finale_2->push_back(features_2_in_2[index]);
+            if (norm(image_in1.at<cv::Vec3i>(int(features_1_in_1[i].x), int(features_1_in_1[i].y)) - image_in2.at<cv::Vec3i>(int(features_2_in_2[index].x), int(features_2_in_2[index].y))) < MAX_DIFF_COLOR)
+            {
+                features_finale_1->push_back(features_1_in_1[i]);
+                features_finale_2->push_back(features_2_in_2[index]);
+            }
         }
     }
 
@@ -121,7 +125,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     {
         circle(image_in1, (*features_finale_1)[i], 1, cv::Scalar(255, 0, 0), 2);
     }
-    imshow("Features 2 to 1", image_in1);
+    //imshow("Features 2 to 1", image_in1);
     // cv::Mat image_out(846, 1504, CV_32FC3);
 
     // image_in1.convertTo(image_in1, CV_32FC3, 1.0f / 255.0f);
@@ -151,7 +155,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     cv::Mat im1 = image_in1.clone();
     cv::drawKeypoints(im1, keyPoints1, im1);
 
-    imshow("Keypoints image 1", im1);
+    //imshow("Keypoints image 1", im1);
     // cv::Mat H = cv::findHomography(obj, scene, cv::RANSAC);
     // //-- Get the corners from the image_1 ( the object to be "detected" )
     // std::vector<cv::Point2f> obj_corners(4);

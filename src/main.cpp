@@ -310,15 +310,19 @@ int main(int argc, char **argv)
 {
     if (std::filesystem::exists("nuage_all.ply"))
         remove("nuage_all.ply");
-    ProgressBar bar(std::cout, 7);
+    ProgressBar bar(std::cout, 37);
     bar.init();
 
-    for (int i = 3; i < 10; i++)
+    for (int i = 1; i < 13; i++)
     {
-        compute_cloud_image("data/mario/" + std::to_string(i) + ".jpg", "data/mario/" + std::to_string(i + 1) + ".jpg", "nuage_all.ply");
-        bar.update(i - 2, 9);
+        compute_cloud_image("data/mario/" + std::to_string(3 * i) + ".jpg", "data/mario/" + std::to_string(3 * i + 1) + ".jpg", "nuage_all.ply");
+        bar.update(i - 2, 40);
+        compute_cloud_image("data/mario/" + std::to_string(3 * i + 1) + ".jpg", "data/mario/" + std::to_string(3 * i + 2) + ".jpg", "nuage_all.ply");
+        bar.update(i - 2, 40);
+        compute_cloud_image("data/mario/" + std::to_string(3 * i + 2) + ".jpg", "data/mario/" + std::to_string(3 * i) + ".jpg", "nuage_all.ply");
+        bar.update(i - 2, 40);
     }
-
+    std::cout << "]" << std::endl;
     // while (true)
     // {
     //     // Close and quit only when Escape is pressed
