@@ -120,7 +120,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
             }
         }
     }
-
+    std::cout << "size 1 : " << features_finale_1->size() << " size 2 : " << features_finale_2->size() << std::endl;
     for (int i = 0; i < features_finale_1->size(); i++)
     {
         circle(image_in1, (*features_finale_1)[i], 1, cv::Scalar(255, 0, 0), 2);

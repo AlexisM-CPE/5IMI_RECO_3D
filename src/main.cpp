@@ -315,6 +315,7 @@ int main(int argc, char **argv)
 
     for (int i = 1; i < 13; i++)
     {
+        std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
         compute_cloud_image("data/mario/" + std::to_string(3 * i) + ".jpg", "data/mario/" + std::to_string(3 * i + 1) + ".jpg", "nuage_all.ply");
         bar.update(i - 2, 40);
         compute_cloud_image("data/mario/" + std::to_string(3 * i + 1) + ".jpg", "data/mario/" + std::to_string(3 * i + 2) + ".jpg", "nuage_all.ply");
