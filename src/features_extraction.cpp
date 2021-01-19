@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#define dist_eps 10.0f
-#define MAX_DIFF_COLOR 60
+#define dist_eps 3.0f
+#define MAX_DIFF_COLOR 10
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *features_finale_1, std::vector<cv::Point2f> *features_finale_2, int threshold)
 {
@@ -120,7 +120,7 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
             }
         }
     }
-    std::cout << "size 1 : " << features_finale_1->size() << " size 2 : " << features_finale_2->size() << std::endl;
+    //std::cout << "size 1 : " << features_finale_1->size() << " size 2 : " << features_finale_2->size() << std::endl;
     for (int i = 0; i < features_finale_1->size(); i++)
     {
         circle(image_in1, (*features_finale_1)[i], 1, cv::Scalar(255, 0, 0), 2);
