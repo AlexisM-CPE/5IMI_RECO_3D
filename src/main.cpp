@@ -214,6 +214,7 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
     // std::cout << x_min_2 << "  " << x_max_2 << "  " << y_min_2 << "  " << y_max_2 << std::endl;
     // imshow("Image 1 diff segmentee", im_segmentee_diff_1);
     // imshow("Image 2 diff segmentee", im_segmentee_diff_2);
+
 #pragma omp parallel for schedule(dynamic, 1)
     for (int i = 10; i < 836; ++i)
     {
@@ -293,7 +294,7 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
             circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 255, 0), 2);
         }
 
-        cv::Vec3i c_bgr = (im_BGR_1_clean.at<cv::Vec3b>(int(matched_points1[i].x), int(matched_points1[i].y))); // + im_BGR_2_clean.at<cv::Vec3b>(int(matched_points2[i].x), int(matched_points2[i].y)));
+        cv::Vec3i c_bgr = (im_BGR_1_clean.at<cv::Vec3b>(int(matched_points1[i].y), int(matched_points1[i].x))); // + im_BGR_2_clean.at<cv::Vec3b>(int(matched_points2[i].x), int(matched_points2[i].y)));
         colors.push_back(cv::Vec3i(c_bgr[2], c_bgr[1], c_bgr[0]));
         // std::cout << c_bgr[2] << "    " << colors[i][0] << std::endl;
     }
@@ -308,20 +309,30 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
 }
 int main(int argc, char **argv)
 {
-    if (std::filesystem::exists("nuage_all.ply"))
-        remove("nuage_all.ply");
+    if (std::filesystem::exists("nuage_all_2.ply"))
+        remove("nuage_all_2.ply");
     ProgressBar bar(std::cout, 37);
     bar.init();
 
-    for (int i = 1; i < 13; i++)
+    /*for (int i = 1; i < 14; i++)
     {
-        std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
+        //std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
         compute_cloud_image("data/mario/" + std::to_string(3 * i) + ".jpg", "data/mario/" + std::to_string(3 * i + 1) + ".jpg", "nuage_all.ply");
         bar.update(i - 2, 40);
         compute_cloud_image("data/mario/" + std::to_string(3 * i + 1) + ".jpg", "data/mario/" + std::to_string(3 * i + 2) + ".jpg", "nuage_all.ply");
         bar.update(i - 2, 40);
         compute_cloud_image("data/mario/" + std::to_string(3 * i + 2) + ".jpg", "data/mario/" + std::to_string(3 * i) + ".jpg", "nuage_all.ply");
         bar.update(i - 2, 40);
+    }*/
+
+    for (int i = 3; i < 41; i++)
+    {
+        for (int j = i + 1; j <= 41; j++)
+        {
+            //std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
+            compute_cloud_image("data/mario/" + std::to_string(i) + ".jpg", "data/mario/" + std::to_string(j) + ".jpg", "nuage_all_2.ply");
+            bar.update(i - 2, 40);
+        }
     }
     std::cout << "]" << std::endl;
     // while (true)
