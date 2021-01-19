@@ -5,8 +5,10 @@
 #include "segmentation.hpp"
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
+#include "ProgressBar.hpp"
 
 #include "feature_location.hpp"
+#include <filesystem>
 
 #include "utils.hpp"
 #include <iostream>
@@ -246,9 +248,13 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
     // imshow("Image 2 segmentee", im_segmentee_2);
 
     extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
-    std::vector<cv::Vec3b> colors;
+    std::vector<cv::Vec3i> colors;
+    std::vector<int> features_index;
 
-    for (int i = 0; i < matched_points1.size(); i++)
+    // std::cout << camera_pos_1.x << "    " << camera_pos_1.y << "    " << camera_pos_1.z << std::endl;
+    // std::cout << camera_pos_2.x << "    " << camera_pos_2.y << "    " << camera_pos_2.z << std::endl;
+    std::vector<cv::Point3f> points_nuage = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2, features_index);
+    for (int i : features_index)
     {
         if (i % 7 == 0)
         {
@@ -286,13 +292,11 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
             circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(255, 255, 0), 2);
             circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 255, 0), 2);
         }
-        cv::Vec3b c_bgr = (im_BGR_1_clean.at<cv::Vec3b>(int(matched_points1[i].x), int(matched_points1[i].y)) * 0 + 2 * im_BGR_2_clean.at<cv::Vec3b>(int(matched_points2[i].x), int(matched_points2[i].y))) / 2;
-        colors.push_back(cv::Vec3b(c_bgr[2], c_bgr[1], c_bgr[0]));
-    }
 
-    // std::cout << camera_pos_1.x << "    " << camera_pos_1.y << "    " << camera_pos_1.z << std::endl;
-    // std::cout << camera_pos_2.x << "    " << camera_pos_2.y << "    " << camera_pos_2.z << std::endl;
-    std::vector<cv::Point3f> points_nuage = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
+        cv::Vec3i c_bgr = (im_BGR_1_clean.at<cv::Vec3b>(int(matched_points1[i].x), int(matched_points1[i].y))); // + im_BGR_2_clean.at<cv::Vec3b>(int(matched_points2[i].x), int(matched_points2[i].y)));
+        colors.push_back(cv::Vec3i(c_bgr[2], c_bgr[1], c_bgr[0]));
+        // std::cout << c_bgr[2] << "    " << colors[i][0] << std::endl;
+    }
     create_cloud_file_ply(points_nuage, colors, filename_cloud);
 
     // imshow("Features segmentees 1", im_segmentee_1);
@@ -304,11 +308,15 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
 }
 int main(int argc, char **argv)
 {
+    if (std::filesystem::exists("nuage_all.ply"))
+        remove("nuage_all.ply");
+    ProgressBar bar(std::cout, 7);
+    bar.init();
 
-    for (int i = 3; i < 41; i++)
+    for (int i = 3; i < 10; i++)
     {
         compute_cloud_image("data/mario/" + std::to_string(i) + ".jpg", "data/mario/" + std::to_string(i + 1) + ".jpg", "nuage_all.ply");
-        std::cout << i << std::endl;
+        bar.update(i - 2, 9);
     }
 
     // while (true)

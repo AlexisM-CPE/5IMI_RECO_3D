@@ -156,7 +156,7 @@ cv::Point3f find_intersection(cv::Point3f feature_world_2d_1, cv::Point3f cam_pr
     return intersection;
 }
 
-std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos_1, cv::Point3f cam_pos_2, cv::Mat M_transition_1, cv::Mat M_transition_2)
+std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> features_im1, std::vector<cv::Point2f> features_im2, cv::Point3f cam_pos_1, cv::Point3f cam_pos_2, cv::Mat M_transition_1, cv::Mat M_transition_2, std::vector<int> &features_index)
 {
     cv::Point3f cam_proj_1(cam_pos_1.x, cam_pos_1.y, 0.0f);
     cv::Point3f cam_proj_2(cam_pos_2.x, cam_pos_2.y, 0.0f);
@@ -181,10 +181,12 @@ std::vector<cv::Point3f> find_feature_3d_im1_im2(std::vector<cv::Point2f> featur
         float h_2 = H_2 * dist_ft_proj_2 / dist_ft_cam_2;
 
         float h = (h_1 + h_2) / 2;
-
-        cv::Point3f feature(feature_proj.x, feature_proj.y, h);
-
-        features.push_back(feature);
+        if (sqrt(pow(feature_proj.x - 8.0f * 12.375f, 2) + pow(feature_proj.y - 8.0f * 12.375f, 2)) < 70.0f)
+        {
+            cv::Point3f feature(feature_proj.x, feature_proj.y, h);
+            features.push_back(feature);
+            features_index.push_back(i);
+        }
     }
 
     return features;
