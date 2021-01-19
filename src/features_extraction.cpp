@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#define dist_eps 5.0f
+#define dist_eps 2.0f
 
 void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1, cv::Mat *image_out2, std::vector<cv::Point2f> *features_finale_1, std::vector<cv::Point2f> *features_finale_2, int threshold)
 {
@@ -23,9 +23,11 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     std::vector<cv::Point2f> *matched_points2 = new std::vector<cv::Point2f>();
     std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     cv::Mat descriptors1, descriptors2;
-    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, true, false);
+    cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(10, 4, 3, false, false);
     detector->detectAndCompute(image_in1, cv::Mat(), keyPoints1, descriptors1);
     detector->detectAndCompute(image_in2, cv::Mat(), keyPoints2, descriptors2);
+
+    // std::cout << keyPoints1.size() << "   " << keyPoints2.size() << std::endl;
 
     // std::vector<cv::KeyPoint> keyPoints1, keyPoints2;
     // cv::Mat descriptors1, descriptors2;
@@ -45,11 +47,13 @@ void extract_features(cv::Mat image_in1, cv::Mat image_in2, cv::Mat *image_out1,
     // BF.knnMatch(descriptors1, descriptors2, matches, 2);
     matcher->knnMatch(descriptors1, descriptors2, matches, 2);
 
+    // std::cout << matches.size() << std::endl;
+
     std::vector<cv::DMatch> match1;
     std::vector<cv::DMatch> match2;
     std::vector<cv::Point2f> test1;
 
-    const float ratio_thresh = 0.5f;
+    const float ratio_thresh = 1.0f;
     for (size_t i = 0; i < matches.size(); i++)
     {
         if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)

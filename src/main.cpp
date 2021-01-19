@@ -53,7 +53,7 @@ std::string type2str(int type)
 
     return r;
 }
-int main(int argc, char **argv)
+void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, std::string filename_cloud)
 {
     // Loads an image
 
@@ -61,12 +61,12 @@ int main(int argc, char **argv)
     cv::Mat im_gray_mire = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
     cv::Mat im_BGR_mire = imread("data/mario/2.jpg", cv::IMREAD_COLOR);
 
-    cv::Mat im_gray_1 = imread("data/mario/6.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_1 = imread("data/mario/6.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_1 = imread(filename_im_1, cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_1 = imread(filename_im_1, cv::IMREAD_COLOR);
 
     //cv::Mat im_gray_2 = imread("data/mario/2.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_gray_2 = imread("data/mario/7.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat im_BGR_2 = imread("data/mario/7.jpg", cv::IMREAD_COLOR);
+    cv::Mat im_gray_2 = imread(filename_im_2, cv::IMREAD_GRAYSCALE);
+    cv::Mat im_BGR_2 = imread(filename_im_2, cv::IMREAD_COLOR);
 
     cv::Mat im_BGR_features_1 = im_BGR_1.clone();
     cv::Mat im_BGR_features_2 = im_BGR_2.clone();
@@ -157,7 +157,6 @@ int main(int argc, char **argv)
 
     cv::Mat H_mire_to_1 = cv::findHomography(points_mire_in_image_mire, points_mire_in_1, cv::RANSAC);
     cv::Mat H_mire_to_2 = cv::findHomography(points_mire_in_image_mire, points_mire_in_2, cv::RANSAC);
-
     cv::Mat mire_image_in_1;
     cv::Mat mire_image_in_2;
 
@@ -168,8 +167,8 @@ int main(int argc, char **argv)
     warpPerspective(im_BGR_mire, mire_image_in_1, H_mire_to_1, im_BGR_2.size());
     warpPerspective(im_BGR_mire, mire_image_in_2, H_mire_to_2, im_BGR_2.size());
 
-    imshow("Mire in image 1", mire_image_in_1);
-    imshow("Mire in image 2", mire_image_in_2);
+    // imshow("Mire in image 1", mire_image_in_1);
+    // imshow("Mire in image 2", mire_image_in_2);
 
     cv::Mat im_segmentee_diff_1;
     im_segmentee_diff_1 = im_BGR_1_clean.clone();
@@ -209,74 +208,115 @@ int main(int argc, char **argv)
     int x_min_1, x_max_1, y_min_1, y_max_1, x_min_2, x_max_2, y_min_2, y_max_2;
     get_box(x_min_1, x_max_1, y_min_1, y_max_1, M_transition_1);
     get_box(x_min_2, x_max_2, y_min_2, y_max_2, M_transition_2);
-
+    // std::cout << x_min_1 << "  " << x_max_1 << "  " << y_min_1 << "  " << y_max_1 << std::endl;
+    // std::cout << x_min_2 << "  " << x_max_2 << "  " << y_min_2 << "  " << y_max_2 << std::endl;
+    // imshow("Image 1 diff segmentee", im_segmentee_diff_1);
+    // imshow("Image 2 diff segmentee", im_segmentee_diff_2);
 #pragma omp parallel for schedule(dynamic, 1)
-    for (unsigned int i = x_min_1; i < x_max_1; ++i)
+    for (int i = 10; i < 836; ++i)
     {
-        for (unsigned int j = y_min_1; j < y_max_1; ++j)
+        for (int j = 10; j < 1494; ++j)
         {
             int count_1 = 0;
+            int count_2 = 0;
+
             for (int k = -10; k <= 10; k++)
             {
                 for (int l = -10; l <= 10; l++)
                 {
                     if (norm(im_segmentee_diff_1.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
-                        count_1 += 1;
-                }
-            }
-            if (count_1 < 21 * 21 * 3 / 8)
-                im_segmentee_1.at<cv::Vec3f>(i, j) = im_segmentee_diff_1.at<cv::Vec3f>(i, j);
-        }
-    }
-#pragma omp parallel for schedule(dynamic, 1)
-    for (unsigned int i = x_min_2; i < x_max_2; ++i)
-    {
-        for (unsigned int j = y_min_2; j < y_max_2; ++j)
-        {
-            int count_2 = 0;
-            for (int k = -10; k <= 10; k++)
-            {
-                for (int l = -10; l <= 10; l++)
-                {
+                        count_1++;
                     if (norm(im_segmentee_diff_2.at<cv::Vec3f>(i + k, j + l)) < 0.1f)
                         count_2 += 1;
                 }
             }
+            // std::cout << count_1 << std::endl;
+            if (count_1 <= 21 * 21 * 3 / 8)
+                im_segmentee_1.at<cv::Vec3f>(i, j) = im_segmentee_diff_1.at<cv::Vec3f>(i, j);
             if (count_2 < 21 * 21 * 3 / 8)
                 im_segmentee_2.at<cv::Vec3f>(i, j) = im_segmentee_diff_2.at<cv::Vec3f>(i, j);
         }
     }
+
     im_segmentee_1.convertTo(im_segmentee_1, CV_8UC3, 255);
     im_segmentee_2.convertTo(im_segmentee_2, CV_8UC3, 255);
     im_BGR_1_clean.convertTo(im_BGR_1_clean, CV_8UC3, 255);
     im_BGR_2_clean.convertTo(im_BGR_2_clean, CV_8UC3, 255);
-    imshow("Image 1 segmentee", im_segmentee_1);
-    imshow("Image 2 segmentee", im_segmentee_2);
+    // imshow("Image 1 segmentee", im_segmentee_1);
+    // imshow("Image 2 segmentee", im_segmentee_2);
 
     extract_features(im_segmentee_1, im_segmentee_2, &output_segmentation_1, &output_segmentation_2, &matched_points1, &matched_points2, 10000);
+    std::vector<cv::Vec3b> colors;
 
     for (int i = 0; i < matched_points1.size(); i++)
     {
-        circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(0, 0, 255), 2);
-        circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
+        if (i % 7 == 0)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(0, 0, 255), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(0, 0, 255), 2);
+        }
+
+        else if (i % 7 == 1)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(0, 255, 255), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(0, 255, 255), 2);
+        }
+        else if (i % 7 == 2)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(255, 255, 255), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 255, 255), 2);
+        }
+        else if (i % 7 == 3)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(0, 255, 0), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(0, 255, 0), 2);
+        }
+        else if (i % 7 == 4)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(255, 0, 255), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 0, 255), 2);
+        }
+        else if (i % 7 == 5)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(255, 0, 0), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 0, 0), 2);
+        }
+        else if (i % 7 == 6)
+        {
+            circle(im_segmentee_1, matched_points1[i], 1, cv::Scalar(255, 255, 0), 2);
+            circle(im_segmentee_2, matched_points2[i], 1, cv::Scalar(255, 255, 0), 2);
+        }
+        cv::Vec3b c_bgr = (im_BGR_1_clean.at<cv::Vec3b>(int(matched_points1[i].x), int(matched_points1[i].y)) * 0 + 2 * im_BGR_2_clean.at<cv::Vec3b>(int(matched_points2[i].x), int(matched_points2[i].y))) / 2;
+        colors.push_back(cv::Vec3b(c_bgr[2], c_bgr[1], c_bgr[0]));
     }
 
+    // std::cout << camera_pos_1.x << "    " << camera_pos_1.y << "    " << camera_pos_1.z << std::endl;
+    // std::cout << camera_pos_2.x << "    " << camera_pos_2.y << "    " << camera_pos_2.z << std::endl;
     std::vector<cv::Point3f> points_nuage = find_feature_3d_im1_im2(matched_points1, matched_points2, camera_pos_1, camera_pos_2, M_transition_1, M_transition_2);
-    create_cloud_file(points_nuage, "nuage.xyz");
+    create_cloud_file_ply(points_nuage, colors, filename_cloud);
 
-    imshow("Features segmentees 1", im_segmentee_1);
-    imshow("Features segmentees 2", im_segmentee_2);
+    // imshow("Features segmentees 1", im_segmentee_1);
+    // imshow("Features segmentees 2", im_segmentee_2);
 
     std::vector<cv::Point2f> matched_transformed_1;
     std::vector<cv::Point2f> matched_transformed_2;
-    std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
+    // std::cout << "Nombres matches 1 : " << matched_points1.size() << " | 2 : " << matched_points2.size() << std::endl;
+}
+int main(int argc, char **argv)
+{
 
-    while (true)
+    for (int i = 3; i < 41; i++)
     {
-        // Close and quit only when Escape is pressed
-        int key = cv::waitKey(0);
-        if (key == 27 || key == -1)
-            break;
+        compute_cloud_image("data/mario/" + std::to_string(i) + ".jpg", "data/mario/" + std::to_string(i + 1) + ".jpg", "nuage_all.ply");
+        std::cout << i << std::endl;
     }
+
+    // while (true)
+    // {
+    //     // Close and quit only when Escape is pressed
+    //     int key = cv::waitKey(0);
+    //     if (key == 27 || key == -1)
+    //         break;
+    // }
     return 0;
 }

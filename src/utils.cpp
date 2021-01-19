@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <cmath>
+#include <filesystem>
 
 #define offset 3.5
 
@@ -278,6 +279,33 @@ void create_cloud_file(std::vector<cv::Point3f> points, std::string filename)
     for (auto point : points)
     {
         cloud_file << point.x << " " << point.y << " " << point.z << std::endl;
+    }
+}
+
+void create_cloud_file_ply(std::vector<cv::Point3f> points, std::vector<cv::Vec3b> color, std::string filename)
+{
+    bool b = std::filesystem::exists(filename);
+    std::fstream cloud_file(filename, std::ios::app);
+    //init
+    if (!b)
+    {
+        cloud_file << "ply" << std::endl;
+        cloud_file << "format ascii 1.0" << std::endl;
+        cloud_file << "element vertex " << points.size() << std::endl;
+        cloud_file << "property float x" << std::endl;
+        cloud_file << "property float y" << std::endl;
+        cloud_file << "property float z" << std::endl;
+        cloud_file << "property uchar red" << std::endl;
+        cloud_file << "property uchar green" << std::endl;
+        cloud_file << "property uchar blue" << std::endl;
+        cloud_file << "end_header" << std::endl;
+    }
+
+    //points
+    for (int i = 0; i < points.size(); i++)
+    {
+        cloud_file << points[i].x << " " << points[i].y << " " << points[i].z << " "
+                   << (unsigned int)color[i][0] << " " << (unsigned int)color[i][1] << " " << (unsigned int)color[i][2] << std::endl;
     }
 }
 

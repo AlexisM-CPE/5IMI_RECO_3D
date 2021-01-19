@@ -121,20 +121,20 @@ cv::Point3f find_intersection(cv::Point3f feature_world_2d_1, cv::Point3f cam_pr
     float gamma1 = cam_proj_1.z - feature_world_2d_1.z;
     float gamma2 = cam_proj_2.z - feature_world_2d_2.z;
 
-    float norm_1 = sqrt(pow(alpha1, 2) + pow(beta1, 2) + pow(gamma1, 2));
-    float norm_2 = sqrt(pow(alpha2, 2) + pow(beta2, 2) + pow(gamma2, 2));
+    float norm_1 = sqrt(pow(alpha1, 2) + pow(beta1, 2)); // + pow(gamma1, 2));
+    float norm_2 = sqrt(pow(alpha2, 2) + pow(beta2, 2)); // + pow(gamma2, 2));
 
     cv::Mat M(2, 2, CV_64F);
     cv::Mat T(2, 1, CV_64F);
     cv::Mat X(2, 1, CV_64F);
 
-    X.at<double>(0, 0) = x2 - x1;
-    X.at<double>(1, 0) = y2 - y1;
+    X.at<double>(0, 0) = x1 - x2;
+    X.at<double>(1, 0) = y1 - y2;
 
-    M.at<double>(0, 0) = alpha1 / norm_1;
-    M.at<double>(0, 1) = -alpha2 / norm_2;
-    M.at<double>(1, 0) = beta1 / norm_1;
-    M.at<double>(1, 1) = -beta2 / norm_2;
+    M.at<double>(0, 0) = -alpha1 / norm_1;
+    M.at<double>(0, 1) = alpha2 / norm_2;
+    M.at<double>(1, 0) = -beta1 / norm_1;
+    M.at<double>(1, 1) = beta2 / norm_2;
 
     cv::Mat M_inv = M.inv();
 
@@ -150,7 +150,7 @@ cv::Point3f find_intersection(cv::Point3f feature_world_2d_1, cv::Point3f cam_pr
     {
         intersection.x = x1 + alpha1 / norm_1 * t;
         intersection.y = y1 + beta1 / norm_1 * t;
-        intersection.z = z1 + gamma1 / norm_1 * t;
+        intersection.z = 0.0f;
     }
 
     return intersection;
