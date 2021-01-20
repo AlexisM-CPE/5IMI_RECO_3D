@@ -309,9 +309,9 @@ void compute_cloud_image(std::string filename_im_1, std::string filename_im_2, s
 }
 int main(int argc, char **argv)
 {
-    if (std::filesystem::exists("nuage_all_2.ply"))
-        remove("nuage_all_2.ply");
-    ProgressBar bar(std::cout, 37);
+    if (std::filesystem::exists("nuage_all_fleur.ply"))
+        remove("nuage_all_fleur.ply");
+    ProgressBar bar(std::cout, 21);
     bar.init();
 
     /*for (int i = 1; i < 14; i++)
@@ -325,15 +325,14 @@ int main(int argc, char **argv)
         bar.update(i - 2, 40);
     }*/
 
-    for (int i = 3; i < 41; i++)
+    for (int i = 1; i < 5; i++)
     {
-        for (int j = i + 1; j <= 41; j++)
-        {
-            //std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
-            compute_cloud_image("data/mario/" + std::to_string(i) + ".jpg", "data/mario/" + std::to_string(j) + ".jpg", "nuage_all_2.ply");
-            bar.update(i - 2, 40);
-        }
+        //std::cout << "image : " << 3 * i << " , " << 3 * i + 1 << " , " << 3 * i + 2 << std::endl;
+        compute_cloud_image("data/fleur/" + std::to_string(i) + ".jpg", "data/fleur/" + std::to_string(i + 1) + ".jpg", "nuage_all_fleur.ply");
+        bar.update(i - 2, 21);
+        std::cout << i << std::endl;
     }
+
     std::cout << "]" << std::endl;
     // while (true)
     // {
